@@ -1,7 +1,8 @@
 /**
  * @file popup.js
  * @description Controller for the Live Tab Stasher extension popup.
- * Manages tab stashing, closing active tabs to free memory, item restoration, and persistent storage synchronization.
+ * Manages tab stashing, process closing for RAM relief, deterministic storage synchronization,
+ * search filtering, Material 3 UI rendering, and snackbar undo states.
  */
 
 'use strict';
@@ -11,6 +12,12 @@
  * @type {string}
  */
 const STORAGE_KEY = 'stashedTabs';
+
+/**
+ * Average memory consumed per Chromium tab (used for UX RAM estimation).
+ * @type {number}
+ */
+const AVG_RAM_PER_TAB_MB = 95;
 
 /**
  * Restricted URL schemes that the browser prevents extensions from controlling or closing safely.
@@ -26,14 +33,29 @@ const RESTRICTED_SCHEMES = [
 ];
 
 /**
+ * Undo buffer holding last action state for the Material snackbar.
+ * @type {{action: 'stash'|'delete', tab: Object, index: number}|null}
+ */
+let lastUndoAction = null;
+let snackbarTimeout = null;
+
+/**
  * DOM Elements Cache
  */
 const elements = {
   stashBtn: document.getElementById('stashBtn'),
   stashedList: document.getElementById('stashedList'),
   tabCount: document.getElementById('tabCount'),
+  ramSavedLabel: document.getElementById('ramSavedLabel'),
   alertBanner: document.getElementById('alertBanner'),
-  alertMessage: document.getElementById('alertMessage')
+  alertMessage: document.getElementById('alertMessage'),
+  toolbarContainer: document.getElementById('toolbarContainer'),
+  searchInput: document.getElementById('searchInput'),
+  clearSearchBtn: document.getElementById('clearSearchBtn'),
+  restoreAllBtn: document.getElementById('restoreAllBtn'),
+  snackbar: document.getElementById('snackbar'),
+  snackbarText: document.getElementById('snackbarText'),
+  snackbarUndoBtn: document.getElementById('snackbarUndoBtn')
 };
 
 /**
@@ -84,7 +106,7 @@ function isRestrictedUrl(url) {
 }
 
 /**
- * Displays a transient or persistent error notification banner in the UI.
+ * Displays a transient error banner in the UI.
  * @param {string} message - Alert message to display.
  */
 function showAlert(message) {
@@ -97,6 +119,48 @@ function showAlert(message) {
       elements.alertBanner.classList.remove('visible');
     }
   }, 3500);
+}
+
+/**
+ * Displays the Material feedback snackbar with an optional Undo action.
+ * @param {string} message - Feedback text.
+ * @param {boolean} showUndo - Whether the undo button should be active.
+ */
+function showSnackbar(message, showUndo = true) {
+  if (!elements.snackbar || !elements.snackbarText) return;
+
+  if (snackbarTimeout) {
+    clearTimeout(snackbarTimeout);
+  }
+
+  elements.snackbarText.textContent = message;
+  if (elements.snackbarUndoBtn) {
+    elements.snackbarUndoBtn.style.display = showUndo ? 'inline-block' : 'none';
+  }
+
+  elements.snackbar.classList.add('show');
+
+  snackbarTimeout = setTimeout(() => {
+    if (elements.snackbar) {
+      elements.snackbar.classList.remove('show');
+    }
+    lastUndoAction = null;
+  }, 4000);
+}
+
+/**
+ * Formats a timestamp into a human-readable relative time string.
+ * @param {number} timestamp - Unix epoch time in ms.
+ * @returns {string} Formatted relative time.
+ */
+function formatRelativeTime(timestamp) {
+  if (!timestamp) return '';
+  const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
+
+  if (secondsAgo < 45) return 'Just now';
+  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
+  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
+  return `${Math.floor(secondsAgo / 86400)}d ago`;
 }
 
 /**
@@ -134,19 +198,27 @@ async function handleStashCurrentTab() {
     }
 
     const newTabEntry = {
-      id: (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `tab_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title: activeTab.title ? activeTab.title.trim() : '',
       url: activeTab.url,
       favIconUrl: activeTab.favIconUrl || '',
       stashedAt: Date.now()
     };
 
-    // Always fetch latest array to prevent race conditions
+    // Synchronize latest state to eliminate race conditions
     const currentTabs = await getStoredTabs();
     const updatedTabs = [newTabEntry, ...currentTabs];
 
     await saveTabs(updatedTabs);
     await renderStashedList();
+
+    // Setup Undo record
+    lastUndoAction = {
+      action: 'stash',
+      tab: newTabEntry,
+      index: 0
+    };
+    showSnackbar('Tab stashed & closed to free RAM', true);
 
     // Immediately close the active tab to reclaim RAM
     await chrome.tabs.remove(activeTab.id);
@@ -180,17 +252,54 @@ async function handleRestoreTab(id, url) {
 }
 
 /**
+ * Restores all stashed tabs in batch and purges storage.
+ * @returns {Promise<void>}
+ */
+async function handleRestoreAll() {
+  try {
+    const tabs = await getStoredTabs();
+    if (tabs.length === 0) return;
+
+    // Restore in reverse order so original order is preserved in browser
+    for (const tab of [...tabs].reverse()) {
+      if (tab.url) {
+        await chrome.tabs.create({ url: tab.url, active: false });
+      }
+    }
+
+    await saveTabs([]);
+    await renderStashedList();
+    showSnackbar(`Restored ${tabs.length} tabs`, false);
+  } catch (error) {
+    console.error('Error in batch restore:', error);
+    showAlert('Failed to restore all tabs.');
+  }
+}
+
+/**
  * Deletes a stashed tab item without opening it.
+ * Supports Undo via snackbar.
  * @param {string} id - Unique identifier of the tab to remove.
  * @returns {Promise<void>}
  */
 async function handleDeleteTab(id) {
   try {
     const currentTabs = await getStoredTabs();
-    const filteredTabs = currentTabs.filter((tab) => tab.id !== id);
+    const itemIndex = currentTabs.findIndex((tab) => tab.id === id);
+    if (itemIndex === -1) return;
 
-    await saveTabs(filteredTabs);
+    const [deletedItem] = currentTabs.splice(itemIndex, 1);
+
+    await saveTabs(currentTabs);
     await renderStashedList();
+
+    // Setup Undo record
+    lastUndoAction = {
+      action: 'delete',
+      tab: deletedItem,
+      index: itemIndex
+    };
+    showSnackbar('Tab removed from stash', true);
   } catch (error) {
     console.error('Error deleting tab:', error);
     showAlert('Failed to remove tab from stash.');
@@ -198,115 +307,53 @@ async function handleDeleteTab(id) {
 }
 
 /**
- * Renders the list of stashed tabs in the popup UI.
- * Handles empty states, favicon fallbacks, title truncation, and event bindings.
+ * Reverses the last stashing or deletion action.
  * @returns {Promise<void>}
  */
-async function renderStashedList() {
-  const tabs = await getStoredTabs();
-  const { stashedList, tabCount } = elements;
+async function handleUndo() {
+  if (!lastUndoAction) return;
 
-  if (!stashedList) return;
+  try {
+    const { action, tab, index } = lastUndoAction;
+    const currentTabs = await getStoredTabs();
 
-  // Update badge counter
-  if (tabCount) {
-    tabCount.textContent = String(tabs.length);
-  }
-
-  // Clear previous DOM nodes
-  stashedList.innerHTML = '';
-
-  // Empty State Guard
-  if (tabs.length === 0) {
-    const emptyState = document.createElement('div');
-    emptyState.className = 'empty-state';
-    emptyState.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
-      </svg>
-      <span>No stashed tabs</span>
-    `;
-    stashedList.appendChild(emptyState);
-    return;
-  }
-
-  // Render list items
-  tabs.forEach((tab) => {
-    const listItem = document.createElement('li');
-    listItem.className = 'stashed-item';
-    listItem.setAttribute('role', 'button');
-    listItem.setAttribute('tabindex', '0');
-    listItem.title = `Click to restore: ${tab.title || tab.url}`;
-
-    // Item Content Area (Favicon + Title + Domain)
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'item-content';
-
-    // Favicon handling with safe SVG fallback
-    if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
-      const img = document.createElement('img');
-      img.className = 'item-favicon';
-      img.src = tab.favIconUrl;
-      img.alt = '';
-      img.onerror = () => {
-        img.replaceWith(createFallbackIcon());
-      };
-      contentDiv.appendChild(img);
-    } else {
-      contentDiv.appendChild(createFallbackIcon());
+    if (action === 'delete') {
+      // Restore back into storage at original index
+      currentTabs.splice(index, 0, tab);
+      await saveTabs(currentTabs);
+      await renderStashedList();
+      showSnackbar('Deletion undone', false);
+    } else if (action === 'stash') {
+      // Re-open tab in browser and remove from stashed list
+      if (tab.url) {
+        await chrome.tabs.create({ url: tab.url, active: true });
+      }
+      const filteredTabs = currentTabs.filter((t) => t.id !== tab.id);
+      await saveTabs(filteredTabs);
+      await renderStashedList();
+      showSnackbar('Stash undone & tab reopened', false);
     }
 
-    // Detail Container
-    const detailDiv = document.createElement('div');
-    detailDiv.className = 'item-details';
+    lastUndoAction = null;
+    if (elements.snackbar) {
+      elements.snackbar.classList.remove('show');
+    }
+  } catch (error) {
+    console.error('Error executing undo:', error);
+  }
+}
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'item-title';
-    titleEl.textContent = tab.title || tab.url;
-
-    const domainEl = document.createElement('div');
-    domainEl.className = 'item-domain';
-    domainEl.textContent = getHostname(tab.url);
-
-    detailDiv.appendChild(titleEl);
-    detailDiv.appendChild(domainEl);
-    contentDiv.appendChild(detailDiv);
-
-    // Clicking content restores tab
-    contentDiv.addEventListener('click', (event) => {
-      event.stopPropagation();
-      handleRestoreTab(tab.id, tab.url);
-    });
-
-    // Delete Button (Material Icon Button)
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn-delete';
-    deleteBtn.type = 'button';
-    deleteBtn.title = 'Remove without opening';
-    deleteBtn.setAttribute('aria-label', `Delete ${tab.title || tab.url}`);
-    deleteBtn.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-      </svg>
-    `;
-
-    deleteBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      handleDeleteTab(tab.id);
-    });
-
-    // Keyboard navigation (Enter / Space restores)
-    listItem.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        handleRestoreTab(tab.id, tab.url);
-      }
-    });
-
-    listItem.appendChild(contentDiv);
-    listItem.appendChild(deleteBtn);
-    stashedList.appendChild(listItem);
-  });
+/**
+ * Copies a tab's URL to the clipboard.
+ * @param {string} url - Target URL to copy.
+ */
+async function handleCopyUrl(url) {
+  try {
+    await navigator.clipboard.writeText(url);
+    showSnackbar('URL copied to clipboard', false);
+  } catch (err) {
+    console.error('Failed to copy URL:', err);
+  }
 }
 
 /**
@@ -322,12 +369,252 @@ function createFallbackIcon() {
 }
 
 /**
- * Initialization lifecycle handler.
+ * Renders the list of stashed tabs in the popup UI with real-time query filtering.
+ * @returns {Promise<void>}
+ */
+async function renderStashedList() {
+  const tabs = await getStoredTabs();
+  const { stashedList, tabCount, ramSavedLabel, toolbarContainer, searchInput } = elements;
+
+  if (!stashedList) return;
+
+  const totalCount = tabs.length;
+
+  // Update Header Badges & Memory Estimator
+  if (tabCount) {
+    tabCount.textContent = String(totalCount);
+  }
+  if (ramSavedLabel) {
+    const ramFreedMb = totalCount * AVG_RAM_PER_TAB_MB;
+    ramSavedLabel.textContent = totalCount > 0 ? `~${ramFreedMb} MB RAM freed` : '0 MB RAM freed';
+  }
+
+  // Toggle Search/Batch Toolbar when items exist
+  if (toolbarContainer) {
+    if (totalCount >= 2) {
+      toolbarContainer.classList.add('visible');
+    } else {
+      toolbarContainer.classList.remove('visible');
+      if (searchInput) searchInput.value = '';
+    }
+  }
+
+  // Filter tabs based on search term
+  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const filteredTabs = query
+    ? tabs.filter((t) => (t.title && t.title.toLowerCase().includes(query)) || (t.url && t.url.toLowerCase().includes(query)))
+    : tabs;
+
+  // Clear previous DOM nodes
+  stashedList.innerHTML = '';
+
+  // Empty State Guard
+  if (totalCount === 0) {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    emptyState.innerHTML = `
+      <div class="empty-illustration">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+        </svg>
+      </div>
+      <span class="empty-title">No stashed tabs</span>
+      <span class="empty-subtitle">Click "Stash Current Tab" to immediately close idle tabs and reclaim memory.</span>
+    `;
+    stashedList.appendChild(emptyState);
+    return;
+  }
+
+  // Search No Matches State
+  if (filteredTabs.length === 0 && query) {
+    const noMatch = document.createElement('div');
+    noMatch.className = 'empty-state';
+    noMatch.innerHTML = `
+      <span class="empty-title">No matching tabs</span>
+      <span class="empty-subtitle">No saved tabs match "${escapeHtml(query)}"</span>
+    `;
+    stashedList.appendChild(noMatch);
+    return;
+  }
+
+  // Render individual list items
+  filteredTabs.forEach((tab) => {
+    const listItem = document.createElement('li');
+    listItem.className = 'stashed-item';
+    listItem.setAttribute('role', 'button');
+    listItem.setAttribute('tabindex', '0');
+    listItem.title = `Click to restore: ${tab.title || tab.url}`;
+
+    // Item Main Body (Favicon + Text Details)
+    const mainDiv = document.createElement('div');
+    mainDiv.className = 'item-main';
+
+    // Favicon container
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'favicon-wrap';
+
+    if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
+      const img = document.createElement('img');
+      img.className = 'item-favicon';
+      img.src = tab.favIconUrl;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.onerror = () => {
+        img.replaceWith(createFallbackIcon());
+      };
+      iconWrap.appendChild(img);
+    } else {
+      iconWrap.appendChild(createFallbackIcon());
+    }
+    mainDiv.appendChild(iconWrap);
+
+    // Detail group
+    const textGroup = document.createElement('div');
+    textGroup.className = 'item-text-group';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'item-title';
+    titleEl.textContent = tab.title || tab.url;
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'item-meta';
+
+    const domainSpan = document.createElement('span');
+    domainSpan.textContent = getHostname(tab.url);
+
+    const separator = document.createElement('span');
+    separator.className = 'separator';
+    separator.textContent = '•';
+
+    const timeSpan = document.createElement('span');
+    timeSpan.textContent = formatRelativeTime(tab.stashedAt);
+
+    metaEl.appendChild(domainSpan);
+    metaEl.appendChild(separator);
+    metaEl.appendChild(timeSpan);
+
+    textGroup.appendChild(titleEl);
+    textGroup.appendChild(metaEl);
+    mainDiv.appendChild(textGroup);
+
+    // Clicking main card restores tab
+    mainDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleRestoreTab(tab.id, tab.url);
+    });
+
+    // Action buttons (Copy + Delete)
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'item-actions';
+
+    // Copy Link Button
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn-icon';
+    copyBtn.type = 'button';
+    copyBtn.title = 'Copy URL';
+    copyBtn.setAttribute('aria-label', 'Copy tab URL');
+    copyBtn.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+      </svg>
+    `;
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleCopyUrl(tab.url);
+    });
+
+    // Delete Button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-icon delete';
+    deleteBtn.type = 'button';
+    deleteBtn.title = 'Remove from stash';
+    deleteBtn.setAttribute('aria-label', `Delete ${tab.title || tab.url}`);
+    deleteBtn.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    `;
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleDeleteTab(tab.id);
+    });
+
+    actionsDiv.appendChild(copyBtn);
+    actionsDiv.appendChild(deleteBtn);
+
+    // Keyboard support for restoration
+    listItem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleRestoreTab(tab.id, tab.url);
+      }
+    });
+
+    listItem.appendChild(mainDiv);
+    listItem.appendChild(actionsDiv);
+    stashedList.appendChild(listItem);
+  });
+}
+
+/**
+ * Escapes HTML characters for safe UI interpolation.
+ * @param {string} str - Raw string.
+ * @returns {string} Escaped string.
+ */
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Event Listeners & Lifecycle Setup
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Bind primary action
+  // Stash primary action
   if (elements.stashBtn) {
     elements.stashBtn.addEventListener('click', handleStashCurrentTab);
+  }
+
+  // Restore All batch action
+  if (elements.restoreAllBtn) {
+    elements.restoreAllBtn.addEventListener('click', handleRestoreAll);
+  }
+
+  // Undo button
+  if (elements.snackbarUndoBtn) {
+    elements.snackbarUndoBtn.addEventListener('click', handleUndo);
+  }
+
+  // Search input and clear action
+  if (elements.searchInput) {
+    elements.searchInput.addEventListener('input', () => {
+      if (elements.clearSearchBtn) {
+        if (elements.searchInput.value) {
+          elements.clearSearchBtn.classList.add('visible');
+        } else {
+          elements.clearSearchBtn.classList.remove('visible');
+        }
+      }
+      renderStashedList();
+    });
+
+    elements.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        elements.searchInput.value = '';
+        if (elements.clearSearchBtn) elements.clearSearchBtn.classList.remove('visible');
+        renderStashedList();
+      }
+    });
+  }
+
+  if (elements.clearSearchBtn) {
+    elements.clearSearchBtn.addEventListener('click', () => {
+      if (elements.searchInput) {
+        elements.searchInput.value = '';
+        elements.clearSearchBtn.classList.remove('visible');
+        elements.searchInput.focus();
+        renderStashedList();
+      }
+    });
   }
 
   // Initial render
