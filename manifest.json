@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Live Tab Stasher",
+  "version": "1.0.0",
+  "description": "Lightning-fast session manager that stashes tabs and closes them immediately to eliminate RAM consumption.",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Live Tab Stasher"
+  }
+}
