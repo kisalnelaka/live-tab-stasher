@@ -15,6 +15,51 @@ const STORAGE_KEY = 'stashedTabs';
 const SETTINGS_KEY = 'userSettings';
 
 /**
+ * Polyfill for demo/standalone preview mode outside extension context
+ */
+if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+  const mockTabs = [
+    { id: 'tab_linear', title: 'Linear – Modern software development tool', url: 'https://linear.app/features', favIconUrl: 'https://linear.app/favicon.ico', stashedAt: Date.now() - 1000 * 60 * 15, pinned: true },
+    { id: 'tab_gh', title: 'GitHub: Where the world builds software', url: 'https://github.com/trending', favIconUrl: 'https://github.githubassets.com/favicons/favicon.png', stashedAt: Date.now() - 1000 * 60 * 42, pinned: false },
+    { id: 'tab_netflix', title: 'Netflix: Watch TV Shows & Movies Online', url: 'https://netflix.com', favIconUrl: 'https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico', stashedAt: Date.now() - 1000 * 60 * 55, pinned: false },
+    { id: 'tab_hf', title: 'Hugging Face – The AI community & open models', url: 'https://huggingface.co/models', favIconUrl: 'https://huggingface.co/favicon.ico', stashedAt: Date.now() - 1000 * 60 * 60 * 22, pinned: false },
+    { id: 'tab_stripe', title: 'Stripe Documentation – Global payment APIs', url: 'https://stripe.com/docs', favIconUrl: 'https://stripe.com/favicon.ico', stashedAt: Date.now() - 1000 * 60 * 60 * 26, pinned: false },
+    { id: 'tab_raycast', title: 'Raycast Store – Fast, extensible launcher', url: 'https://raycast.com', favIconUrl: 'https://raycast.com/favicon.ico', stashedAt: Date.now() - 1000 * 60 * 60 * 70, pinned: false },
+    { id: 'tab_deepmind', title: 'Google DeepMind: Pioneering Research & Frontier AI', url: 'https://deepmind.google', favIconUrl: 'https://deepmind.google/favicon.ico', stashedAt: Date.now() - 1000 * 60 * 60 * 180, pinned: false }
+  ];
+  const mockStorageData = {
+    [STORAGE_KEY]: mockTabs,
+    [SETTINGS_KEY]: { groupByDate: true, ignorePinnedTabs: true, sortBy: 'date-desc', closeOnStash: true }
+  };
+  window.chrome = {
+    storage: {
+      local: {
+        get: async (keys) => {
+          const res = {};
+          keys.forEach(k => res[k] = mockStorageData[k]);
+          return res;
+        },
+        set: async (obj) => {
+          Object.assign(mockStorageData, obj);
+        }
+      }
+    },
+    tabs: {
+      query: async () => [{ id: 888, title: 'Figma: Collaborative interface design tool', url: 'https://figma.com', favIconUrl: 'https://www.figma.com/favicon.ico', active: true }],
+      remove: async () => {},
+      create: async ({ url }) => { console.log('Mock restored:', url); }
+    },
+    windows: {
+      getCurrent: async () => ({ id: 1, tabs: [{ id: 1, title: 'Tab 1', url: 'https://news.ycombinator.com' }, { id: 2, title: 'Tab 2', url: 'https://youtube.com' }, { id: 3, title: 'Tab 3', url: 'https://docs.google.com' }] })
+    },
+    sidePanel: {
+      open: async () => { console.log('Mock side panel opened'); }
+    },
+    runtime: { lastError: null }
+  };
+}
+
+/**
  * Memory Estimator Constant (MB per Chromium tab)
  */
 const AVG_RAM_PER_TAB_MB = 95;
