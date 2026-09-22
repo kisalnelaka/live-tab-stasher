@@ -6,18 +6,18 @@
   <title>Live Tab Stasher</title>
   <style>
     :root {
-      /* Studio Obsidian Pro Dark Theme */
+      /* Studio Dark Theme (Zinc / Obsidian) */
       --bg-base: #09090b;
-      --bg-surface: #121215;
-      --bg-surface-elevated: #18181d;
-      --bg-surface-hover: #1f1f26;
-      --bg-surface-active: #272732;
-      --bg-glass: rgba(14, 14, 18, 0.88);
+      --bg-surface: #111114;
+      --bg-surface-elevated: #18181c;
+      --bg-surface-hover: #1e1e24;
+      --bg-surface-active: #262630;
+      --bg-glass: rgba(12, 12, 15, 0.94);
 
       --border-subtle: rgba(255, 255, 255, 0.05);
-      --border-default: rgba(255, 255, 255, 0.09);
-      --border-active: rgba(255, 255, 255, 0.16);
-      --border-focus: rgba(99, 102, 241, 0.45);
+      --border-default: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(255, 255, 255, 0.15);
+      --border-focus: rgba(99, 102, 241, 0.5);
 
       --text-primary: #f4f4f6;
       --text-secondary: #a1a1aa;
@@ -27,23 +27,23 @@
       --accent-primary: #4f46e5;
       --accent-primary-hover: #6366f1;
       --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-      --accent-glow: 0 0 16px rgba(79, 70, 229, 0.35);
+      --accent-glow: 0 0 16px rgba(79, 70, 229, 0.3);
 
       --accent-emerald: #10b981;
-      --accent-emerald-dim: rgba(16, 185, 129, 0.14);
+      --accent-emerald-dim: rgba(16, 185, 129, 0.12);
       --accent-amber: #f59e0b;
-      --accent-amber-dim: rgba(245, 158, 11, 0.14);
+      --accent-amber-dim: rgba(245, 158, 11, 0.12);
       --accent-rose: #f43f5e;
-      --accent-rose-dim: rgba(244, 63, 94, 0.14);
+      --accent-rose-dim: rgba(244, 63, 94, 0.12);
 
       --radius-xs: 4px;
       --radius-sm: 6px;
-      --radius-md: 9px;
-      --radius-lg: 12px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
       --radius-full: 9999px;
 
-      --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      --shadow-popover: 0 12px 32px -4px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      --shadow-popover: 0 12px 30px -4px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
 
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Geist", sans-serif;
     }
@@ -55,12 +55,12 @@
         --bg-surface-elevated: #f1f5f9;
         --bg-surface-hover: #e2e8f0;
         --bg-surface-active: #cbd5e1;
-        --bg-glass: rgba(255, 255, 255, 0.92);
+        --bg-glass: rgba(255, 255, 255, 0.94);
 
         --border-subtle: rgba(0, 0, 0, 0.05);
-        --border-default: rgba(0, 0, 0, 0.09);
-        --border-active: rgba(0, 0, 0, 0.16);
-        --border-focus: rgba(79, 70, 229, 0.4);
+        --border-default: rgba(0, 0, 0, 0.08);
+        --border-active: rgba(0, 0, 0, 0.15);
+        --border-focus: rgba(79, 70, 229, 0.45);
 
         --text-primary: #0f172a;
         --text-secondary: #475569;
@@ -79,7 +79,7 @@
         --accent-rose: #e11d48;
         --accent-rose-dim: rgba(225, 29, 72, 0.12);
 
-        --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
         --shadow-popover: 0 10px 25px -3px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
       }
     }
@@ -91,23 +91,19 @@
     }
 
     html, body {
-      width: 400px;
-      height: 580px;
-      min-width: 360px;
-      max-width: 100vw;
-      min-height: 500px;
-      max-height: 100vh;
+      width: 380px;
+      height: 540px;
+      margin: 0;
+      padding: 0;
       font-family: var(--font-sans);
       background-color: var(--bg-base);
       color: var(--text-primary);
       overflow: hidden;
       user-select: none;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Side Panel Fullscreen Adaptation */
-    @media screen and (min-width: 450px) {
+    @media screen and (min-width: 420px) {
       html, body {
         width: 100vw;
         height: 100vh;
@@ -116,27 +112,30 @@
 
     /* Views Layout Container */
     .view-deck {
-      position: relative;
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-height: 0;
+      position: relative;
     }
 
     .view-page {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      height: 100%;
-      width: 100%;
       overflow: hidden;
+      min-height: 0;
+      flex: 1;
     }
 
     .view-page.hidden {
       display: none;
     }
 
-    /* Top App Header */
+    /* Header Bar */
     .app-header {
       padding: 10px 14px;
       display: flex;
@@ -153,18 +152,17 @@
     .app-branding {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
     }
 
     .app-icon-wrap {
-      width: 24px;
-      height: 24px;
-      border-radius: var(--radius-sm);
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-xs);
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
       border: 1px solid var(--border-default);
     }
 
@@ -181,9 +179,9 @@
     }
 
     .app-title {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      letter-spacing: -0.015em;
+      letter-spacing: -0.01em;
       color: var(--text-primary);
       line-height: 1.2;
     }
@@ -192,10 +190,9 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 500;
       color: var(--accent-emerald);
-      letter-spacing: -0.01em;
     }
 
     .status-dot {
@@ -203,12 +200,12 @@
       height: 5px;
       border-radius: 50%;
       background-color: var(--accent-emerald);
-      box-shadow: 0 0 6px var(--accent-emerald);
+      box-shadow: 0 0 5px var(--accent-emerald);
     }
 
     .status-separator {
       color: var(--text-faint);
-      font-size: 10px;
+      font-size: 9px;
     }
 
     .status-count {
@@ -223,9 +220,9 @@
     }
 
     .header-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-sm);
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-xs);
       border: 1px solid transparent;
       background: transparent;
       color: var(--text-secondary);
@@ -233,7 +230,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
     }
 
     .header-btn:hover {
@@ -243,14 +240,14 @@
     }
 
     .header-btn svg {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       fill: currentColor;
     }
 
-    /* Unified Hero Action Bar */
+    /* Hero Stash Action Bar */
     .hero-action-panel {
-      padding: 10px 14px 10px 14px;
+      padding: 8px 14px 8px 14px;
       background-color: var(--bg-surface);
       border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
@@ -260,35 +257,34 @@
       display: flex;
       align-items: stretch;
       border-radius: var(--radius-md);
-      overflow: visible;
       box-shadow: var(--shadow-card);
       position: relative;
     }
 
     .btn-stash-active {
       flex: 1;
-      height: 38px;
+      height: 34px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
+      gap: 6px;
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-right: none;
       border-radius: var(--radius-md) 0 0 var(--radius-md);
       background: var(--accent-gradient);
       color: #ffffff;
       font-family: inherit;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: -0.01em;
       cursor: pointer;
       transition: all 0.15s ease;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
     .btn-stash-active:hover {
       filter: brightness(1.08);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), var(--accent-glow);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--accent-glow);
     }
 
     .btn-stash-active:active {
@@ -296,13 +292,13 @@
     }
 
     .btn-stash-active svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       fill: currentColor;
     }
 
     .btn-stash-options-trigger {
-      width: 36px;
+      width: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -320,8 +316,8 @@
     }
 
     .btn-stash-options-trigger svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       fill: currentColor;
       transition: transform 0.2s ease;
     }
@@ -330,19 +326,19 @@
       transform: rotate(180deg);
     }
 
-    /* Popover Menu */
+    /* Floating Popover Menus */
     .popover-menu {
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + 5px);
       right: 0;
       background-color: var(--bg-surface-elevated);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-popover);
-      padding: 5px;
+      padding: 4px;
       display: none;
       flex-direction: column;
-      min-width: 220px;
+      min-width: 200px;
       z-index: 60;
       animation: popIn 0.15s cubic-bezier(0, 0, 0.2, 1);
     }
@@ -352,14 +348,14 @@
     }
 
     .popover-item {
-      padding: 8px 10px;
-      font-size: 12px;
+      padding: 7px 9px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-primary);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-xs);
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       cursor: pointer;
       background: transparent;
       border: none;
@@ -374,8 +370,8 @@
     }
 
     .popover-item svg {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       fill: var(--text-secondary);
       flex-shrink: 0;
     }
@@ -391,28 +387,28 @@
     }
 
     .popover-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
     }
 
     .popover-desc {
-      font-size: 10.5px;
+      font-size: 10px;
       color: var(--text-muted);
     }
 
     /* Alert Banner */
     .alert-banner {
       display: none;
-      margin: 8px 14px 0 14px;
-      padding: 7px 10px;
+      margin: 6px 14px 0 14px;
+      padding: 6px 9px;
       background-color: var(--accent-rose-dim);
       border: 1px solid rgba(244, 63, 94, 0.25);
       color: var(--accent-rose);
-      border-radius: var(--radius-md);
-      font-size: 11.5px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
       align-items: center;
-      gap: 7px;
-      animation: slideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+      gap: 6px;
+      animation: slideIn 0.2s ease;
     }
 
     .alert-banner.visible {
@@ -420,18 +416,18 @@
     }
 
     .alert-banner svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       fill: currentColor;
       flex-shrink: 0;
     }
 
-    /* Raycast-style Search & Navigation Bar */
+    /* Search & Controls Bar */
     .search-nav-bar {
-      padding: 8px 14px;
+      padding: 6px 14px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 6px;
       background-color: var(--bg-base);
       border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
@@ -446,22 +442,22 @@
 
     .search-icon {
       position: absolute;
-      left: 10px;
-      width: 13px;
-      height: 13px;
+      left: 9px;
+      width: 12px;
+      height: 12px;
       fill: var(--text-faint);
       pointer-events: none;
     }
 
     .search-input {
       width: 100%;
-      height: 32px;
-      padding: 0 28px 0 30px;
+      height: 28px;
+      padding: 0 26px 0 28px;
       background-color: var(--bg-surface);
       border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-primary);
       outline: none;
       transition: all 0.15s ease;
@@ -473,23 +469,21 @@
 
     .search-input:focus {
       border-color: var(--border-focus);
-      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
       background-color: var(--bg-surface-elevated);
     }
 
     .search-clear-btn {
       display: none;
       position: absolute;
-      right: 7px;
-      width: 18px;
-      height: 18px;
+      right: 6px;
+      width: 16px;
+      height: 16px;
       border: none;
       background: transparent;
       color: var(--text-faint);
       cursor: pointer;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
     }
 
     .search-clear-btn.visible {
@@ -501,41 +495,40 @@
     }
 
     .search-clear-btn svg {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       fill: currentColor;
     }
 
-    /* Controls Strip: Mode Toggle + Sort Dropdown */
+    /* Controls Strip */
     .controls-strip {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
-    /* Apple-style Segmented View Switcher */
     .segmented-control {
       display: inline-flex;
       background-color: var(--bg-surface);
       border: 1px solid var(--border-default);
-      border-radius: var(--radius-sm);
-      padding: 2px;
-      gap: 2px;
+      border-radius: var(--radius-xs);
+      padding: 1px;
+      gap: 1px;
     }
 
     .segment-item {
       border: none;
       background: transparent;
-      padding: 3px 8px;
-      font-size: 11px;
+      padding: 2px 7px;
+      font-size: 10.5px;
       font-weight: 500;
       color: var(--text-muted);
-      border-radius: var(--radius-xs);
+      border-radius: 3px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       transition: all 0.12s ease;
     }
 
@@ -547,33 +540,32 @@
       background-color: var(--bg-surface-elevated);
       color: var(--text-primary);
       font-weight: 600;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .segment-item svg {
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       fill: currentColor;
     }
 
-    /* Custom Sort Trigger */
+    /* Sort Control */
     .sort-control-wrap {
       position: relative;
     }
 
     .sort-trigger-btn {
-      height: 24px;
-      padding: 0 8px;
-      border-radius: var(--radius-sm);
+      height: 22px;
+      padding: 0 7px;
+      border-radius: var(--radius-xs);
       border: 1px solid var(--border-default);
       background-color: var(--bg-surface);
       color: var(--text-secondary);
       font-family: inherit;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -584,20 +576,21 @@
     }
 
     .sort-trigger-btn svg {
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       fill: currentColor;
     }
 
-    /* Fixed Domain Filter Ribbon */
+    /* Domain Filter Ribbon */
     .domain-ribbon-container {
       display: none;
-      padding: 6px 14px 6px 14px;
+      padding: 5px 14px 5px 14px;
       background-color: var(--bg-base);
       border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
+      gap: 4px;
     }
 
     .domain-ribbon-container::-webkit-scrollbar {
@@ -606,22 +599,21 @@
 
     .domain-ribbon-container.visible {
       display: flex;
-      gap: 5px;
     }
 
     .domain-chip {
-      height: 22px;
-      padding: 0 8px;
+      height: 20px;
+      padding: 0 7px;
       background-color: var(--bg-surface);
       color: var(--text-muted);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-full);
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       white-space: nowrap;
       transition: all 0.12s ease;
       flex-shrink: 0;
@@ -630,32 +622,29 @@
     .domain-chip:hover {
       background-color: var(--bg-surface-hover);
       color: var(--text-secondary);
-      border-color: var(--border-active);
     }
 
     .domain-chip.active {
       background-color: var(--accent-emerald-dim);
       color: var(--accent-emerald);
-      border-color: rgba(16, 185, 129, 0.4);
+      border-color: rgba(16, 185, 129, 0.35);
       font-weight: 600;
     }
 
-    /* Stashed List Scroll Container */
+    /* Scrollable Tabs Area with Robust Flex Sizing */
     .list-scroll-area {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 10px 14px 14px 14px;
+      overflow-x: hidden;
+      padding: 8px 14px 28px 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .list-scroll-area::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .list-scroll-area::-webkit-scrollbar-track {
-      background: transparent;
+      width: 4px;
     }
 
     .list-scroll-area::-webkit-scrollbar-thumb {
@@ -663,18 +652,18 @@
       border-radius: var(--radius-full);
     }
 
-    /* Clean Linear-style Section Folders */
+    /* Clean Section Folders */
     .date-section {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 4px;
+      padding: 3px 2px;
       cursor: pointer;
       user-select: none;
     }
@@ -682,12 +671,12 @@
     .section-title-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .section-chevron {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       fill: var(--text-faint);
       transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
@@ -697,7 +686,7 @@
     }
 
     .section-title {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -705,9 +694,9 @@
     }
 
     .section-badge {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 500;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: var(--radius-full);
       background-color: var(--bg-surface-elevated);
       color: var(--text-secondary);
@@ -718,9 +707,9 @@
       background: transparent;
       border: none;
       color: var(--accent-primary-hover);
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: var(--radius-xs);
       cursor: pointer;
       display: inline-flex;
@@ -730,22 +719,19 @@
     }
 
     .btn-section-restore:hover {
-      background-color: rgba(99, 102, 241, 0.14);
+      background-color: rgba(99, 102, 241, 0.12);
     }
 
     .btn-section-restore svg {
-      width: 10px;
-      height: 10px;
+      width: 9px;
+      height: 9px;
       fill: currentColor;
     }
 
-    /* Folder Accordion Body */
     .section-content {
       display: flex;
       flex-direction: column;
       gap: 3px;
-      overflow: hidden;
-      transition: max-height 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
     }
 
     .date-section.collapsed .section-content {
@@ -757,7 +743,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 7px 9px;
+      padding: 6px 8px;
       border-radius: var(--radius-md);
       background-color: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -779,15 +765,15 @@
     .tab-main-col {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       min-width: 0;
       flex: 1;
     }
 
     .tab-favicon-box {
-      width: 22px;
-      height: 22px;
-      border-radius: var(--radius-sm);
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-xs);
       background-color: var(--bg-surface-elevated);
       border: 1px solid var(--border-subtle);
       display: flex;
@@ -798,14 +784,14 @@
     }
 
     .tab-favicon {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       object-fit: contain;
     }
 
     .tab-favicon-fallback {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       fill: var(--text-faint);
     }
 
@@ -818,7 +804,7 @@
     }
 
     .tab-title-text {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-primary);
       white-space: nowrap;
@@ -830,8 +816,8 @@
     .tab-meta-row {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 10.5px;
+      gap: 4px;
+      font-size: 10px;
       color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
@@ -844,10 +830,9 @@
 
     .tab-meta-dot {
       color: var(--text-faint);
-      font-size: 9px;
+      font-size: 8px;
     }
 
-    /* Actions on card */
     .tab-actions-group {
       display: flex;
       align-items: center;
@@ -863,8 +848,8 @@
     }
 
     .action-icon-btn {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: var(--radius-xs);
       border: none;
       background: transparent;
@@ -891,34 +876,33 @@
     }
 
     .action-icon-btn svg {
-      width: 13px;
-      height: 13px;
+      width: 12px;
+      height: 12px;
       fill: currentColor;
     }
 
-    /* Flat List Container */
     .flat-list-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     /* Empty State */
     .empty-state-view {
-      padding: 48px 24px;
+      padding: 40px 20px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       color: var(--text-muted);
       animation: fadeIn 0.2s ease;
     }
 
     .empty-icon-wrap {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--bg-surface-elevated);
       border: 1px solid var(--border-default);
@@ -929,36 +913,38 @@
     }
 
     .empty-icon-wrap svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       fill: var(--text-secondary);
     }
 
     .empty-heading {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--text-primary);
     }
 
     .empty-detail {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-muted);
-      line-height: 1.45;
-      max-width: 250px;
+      line-height: 1.4;
+      max-width: 240px;
     }
 
-    /* Settings Page View */
+    /* Settings Page View with Proper Scrolling and Padding */
     .settings-view-deck {
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 14px;
+      overflow-x: hidden;
+      padding: 10px 14px 28px 14px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      flex: 1;
+      gap: 12px;
     }
 
     .settings-view-deck::-webkit-scrollbar {
-      width: 5px;
+      width: 4px;
     }
 
     .settings-view-deck::-webkit-scrollbar-thumb {
@@ -972,14 +958,15 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-card);
+      flex-shrink: 0;
     }
 
     .settings-group-header {
-      padding: 9px 12px;
-      font-size: 11px;
+      padding: 7px 10px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       color: var(--text-muted);
       background-color: var(--bg-surface-elevated);
       border-bottom: 1px solid var(--border-subtle);
@@ -989,7 +976,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
@@ -1000,18 +987,18 @@
     .settings-text-block {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding-right: 12px;
+      gap: 1px;
+      padding-right: 10px;
     }
 
     .settings-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-primary);
     }
 
     .settings-subtext {
-      font-size: 10.5px;
+      font-size: 10px;
       color: var(--text-muted);
     }
 
@@ -1019,8 +1006,8 @@
     .toggle-switch {
       position: relative;
       display: inline-block;
-      width: 34px;
-      height: 18px;
+      width: 32px;
+      height: 17px;
       flex-shrink: 0;
     }
 
@@ -1043,8 +1030,8 @@
     .toggle-track:before {
       position: absolute;
       content: "";
-      height: 12px;
-      width: 12px;
+      height: 11px;
+      width: 11px;
       left: 2px;
       bottom: 2px;
       background-color: #ffffff;
@@ -1058,26 +1045,25 @@
     }
 
     input:checked + .toggle-track:before {
-      transform: translateX(16px);
+      transform: translateX(15px);
     }
 
-    /* Settings Action Buttons */
     .btn-grid-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      padding: 10px 12px;
+      gap: 6px;
+      padding: 8px 10px;
     }
 
     .btn-action-tile {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 10px;
-      font-size: 11.5px;
+      gap: 5px;
+      padding: 7px 8px;
+      font-size: 11px;
       font-weight: 500;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border-default);
       background-color: var(--bg-surface-elevated);
       color: var(--text-primary);
@@ -1102,35 +1088,35 @@
 
     .kbd-shortcut {
       font-family: monospace;
-      font-size: 10px;
-      padding: 2px 5px;
+      font-size: 9.5px;
+      padding: 1px 4px;
       border-radius: var(--radius-xs);
       background-color: var(--bg-surface-elevated);
       border: 1px solid var(--border-default);
       color: var(--text-secondary);
     }
 
-    /* Material Feedback Snackbar with Undo */
+    /* Feedback Snackbar */
     .snackbar-banner {
       position: fixed;
-      bottom: 12px;
-      left: 14px;
-      right: 14px;
+      bottom: 10px;
+      left: 12px;
+      right: 12px;
       background-color: var(--bg-surface-elevated);
       color: var(--text-primary);
       border: 1px solid var(--border-active);
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       box-shadow: var(--shadow-popover);
-      font-size: 11.5px;
+      font-size: 11px;
       z-index: 100;
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(8px);
       pointer-events: none;
-      transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
+      transition: all 0.18s cubic-bezier(0, 0, 0.2, 1);
     }
 
     .snackbar-banner.show {
@@ -1144,28 +1130,28 @@
       border: none;
       color: var(--accent-primary-hover);
       font-family: inherit;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 1px 5px;
+      border-radius: 3px;
     }
 
     .snackbar-undo-btn:hover {
       text-decoration: underline;
     }
 
-    /* Confirmation Modal Dialog */
+    /* Confirmation Modal */
     .modal-scrim {
       display: none;
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(3px);
       z-index: 200;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 14px;
     }
 
     .modal-scrim.visible {
@@ -1176,40 +1162,40 @@
       background-color: var(--bg-surface-elevated);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-lg);
-      padding: 16px;
+      padding: 14px;
       width: 100%;
-      max-width: 320px;
+      max-width: 300px;
       box-shadow: var(--shadow-popover);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .modal-heading {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--text-primary);
     }
 
     .modal-desc {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-secondary);
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
     .modal-btns {
       display: flex;
       justify-content: flex-end;
-      gap: 7px;
-      margin-top: 4px;
+      gap: 6px;
+      margin-top: 3px;
     }
 
     .btn-modal-back {
       background: transparent;
       border: 1px solid var(--border-default);
-      border-radius: var(--radius-sm);
-      padding: 5px 11px;
-      font-size: 11.5px;
+      border-radius: var(--radius-xs);
+      padding: 4px 10px;
+      font-size: 11px;
       color: var(--text-secondary);
       cursor: pointer;
     }
@@ -1218,15 +1204,15 @@
       background: var(--accent-rose);
       color: #ffffff;
       border: none;
-      border-radius: var(--radius-sm);
-      padding: 5px 11px;
-      font-size: 11.5px;
+      border-radius: var(--radius-xs);
+      padding: 4px 10px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
     }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-4px); }
+      from { opacity: 0; transform: translateY(-3px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -1245,7 +1231,7 @@
   <div class="view-deck">
     <!-- View 1: Main Tabs List -->
     <div id="mainView" class="view-page">
-      <!-- Top App Header -->
+      <!-- Header -->
       <header class="app-header">
         <div class="app-branding">
           <div class="app-icon-wrap">
@@ -1262,7 +1248,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <button id="sidePanelBtn" class="header-btn" type="button" title="Open in persistent Side Panel" aria-label="Open in Side Panel">
+          <button id="sidePanelBtn" class="header-btn" type="button" title="Open in Side Panel" aria-label="Open in Side Panel">
             <svg viewBox="0 0 24 24">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 16H5V5h7v14zm7 0h-5V5h5v14z"/>
             </svg>
@@ -1275,10 +1261,10 @@
         </div>
       </header>
 
-      <!-- Unified Hero Action Bar -->
+      <!-- Hero Stash Button Bar -->
       <section class="hero-action-panel">
         <div class="unified-button-group">
-          <button id="stashBtn" class="btn-stash-active" type="button" title="Stash active tab and close to free memory">
+          <button id="stashBtn" class="btn-stash-active" type="button" title="Stash active tab and close immediately">
             <svg viewBox="0 0 24 24">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
@@ -1290,15 +1276,15 @@
             </svg>
           </button>
 
-          <!-- Stash Options Popover -->
+          <!-- Dropdown Popover -->
           <div id="stashOptionsPopover" class="popover-menu" role="menu">
             <button id="stashAllWindowBtn" class="popover-item" type="button" role="menuitem">
               <svg viewBox="0 0 24 24">
                 <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
               </svg>
               <div class="popover-text">
-                <span class="popover-title">Stash Window Tabs</span>
-                <span class="popover-desc">Closes all open tabs in this window</span>
+                <span id="stashAllWindowText" class="popover-title">Stash Window Tabs</span>
+                <span class="popover-desc">Close all open tabs in this window</span>
               </div>
             </button>
             <button id="stashOtherTabsBtn" class="popover-item" type="button" role="menuitem">
@@ -1306,20 +1292,20 @@
                 <path d="M19 13H5v-2h14v2z"/>
               </svg>
               <div class="popover-text">
-                <span class="popover-title">Stash Other Tabs</span>
-                <span class="popover-desc">Keep current tab, close background</span>
+                <span id="stashOtherTabsText" class="popover-title">Stash Other Tabs</span>
+                <span class="popover-desc">Keep current tab, close others</span>
               </div>
             </button>
           </div>
         </div>
       </section>
 
-      <!-- Alert Banner -->
+      <!-- Alert Notification Banner -->
       <aside id="alertBanner" class="alert-banner" role="alert" aria-live="polite">
         <svg viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
         </svg>
-        <span id="alertMessage">Restricted browser page cannot be stashed.</span>
+        <span id="alertMessage">Restricted page cannot be stashed.</span>
       </aside>
 
       <!-- Search & Controls Bar -->
@@ -1328,7 +1314,7 @@
           <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          <input id="searchInput" class="search-input" type="text" placeholder="Search saved tabs... (Press / to focus)" autocomplete="off" spellcheck="false">
+          <input id="searchInput" class="search-input" type="text" placeholder="Search tabs... (/ to focus)" autocomplete="off" spellcheck="false">
           <button id="clearSearchBtn" class="search-clear-btn" type="button" aria-label="Clear search">
             <svg viewBox="0 0 24 24">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -1344,7 +1330,7 @@
               </svg>
               <span>Folders</span>
             </button>
-            <button id="viewFlatBtn" class="segment-item" type="button" title="Continuous flat list">
+            <button id="viewFlatBtn" class="segment-item" type="button" title="Flat list">
               <svg viewBox="0 0 24 24">
                 <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
               </svg>
@@ -1371,7 +1357,7 @@
         </div>
       </div>
 
-      <!-- Domain Filter Ribbon -->
+      <!-- Domain Ribbon -->
       <nav id="domainRibbon" class="domain-ribbon-container" aria-label="Filter by domain">
         <!-- Injected dynamically -->
       </nav>
@@ -1442,25 +1428,25 @@
           <div class="settings-group-header">Data Backup & Sync</div>
           <div class="btn-grid-actions">
             <button id="exportJsonBtn" class="btn-action-tile" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
               </svg>
               <span>Export JSON</span>
             </button>
             <button id="exportMarkdownBtn" class="btn-action-tile" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
               </svg>
               <span>Markdown</span>
             </button>
             <button id="importJsonBtn" class="btn-action-tile" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
               </svg>
               <span>Import Backup</span>
             </button>
             <button id="clearAllDataBtn" class="btn-action-tile danger-tile" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
               </svg>
               <span>Clear Stash</span>
@@ -1489,11 +1475,11 @@
     </div>
   </div>
 
-  <!-- Clear All Scrim Modal -->
+  <!-- Clear Scrim Modal -->
   <div id="clearConfirmModal" class="modal-scrim">
     <div class="modal-box">
       <h3 class="modal-heading">Clear All Stashed Tabs?</h3>
-      <p class="modal-desc">This action removes all saved tabs permanently from storage. You can undo this briefly via the snackbar.</p>
+      <p class="modal-desc">This permanently purges all saved tabs from storage. You can undo this briefly via the snackbar.</p>
       <div class="modal-btns">
         <button id="cancelClearBtn" class="btn-modal-back" type="button">Cancel</button>
         <button id="confirmClearBtn" class="btn-modal-purge" type="button">Purge All</button>
@@ -1501,7 +1487,7 @@
     </div>
   </div>
 
-  <!-- Material Feedback Snackbar with Undo -->
+  <!-- Feedback Snackbar with Undo -->
   <div id="snackbar" class="snackbar-banner" role="status">
     <span id="snackbarText">Tab stashed</span>
     <button id="snackbarUndoBtn" class="snackbar-undo-btn" type="button">Undo</button>

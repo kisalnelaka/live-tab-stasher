@@ -1086,11 +1086,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Stash Options Trigger
   if (elements.stashOptionsTrigger) {
-    elements.stashOptionsTrigger.addEventListener('click', (e) => {
+    elements.stashOptionsTrigger.addEventListener('click', async (e) => {
       e.stopPropagation();
       const isVisible = elements.stashOptionsPopover.classList.contains('visible');
       closeAllPopovers();
       if (!isVisible) {
+        try {
+          const currentWin = await chrome.windows.getCurrent({ populate: true });
+          const totalTabs = currentWin && currentWin.tabs ? currentWin.tabs.length : 0;
+          const stashAllText = document.getElementById('stashAllWindowText');
+          const stashOtherText = document.getElementById('stashOtherTabsText');
+          if (stashAllText) stashAllText.textContent = `Stash Window Tabs (${totalTabs})`;
+          if (stashOtherText) stashOtherText.textContent = `Stash Other Tabs (${Math.max(0, totalTabs - 1)})`;
+        } catch (err) {
+          console.debug('Count query bypassed:', err);
+        }
         elements.stashOptionsPopover.classList.add('visible');
         elements.stashOptionsTrigger.classList.add('active');
         elements.stashOptionsTrigger.setAttribute('aria-expanded', 'true');
