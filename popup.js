@@ -1,21 +1,21 @@
 /**
  * @file popup.js
- * @description Controller for the Live Tab Stasher extension popup and side panel.
- * Handles chronological date grouping, multi-criteria sorting, domain filtering,
- * bulk window stashing, star pinning, persistent settings, data export/import,
- * and Material 3 Expressive UI state management.
+ * @description Master controller for Live Tab Stasher.
+ * Manages chronological date grouping, smooth accordion states, custom sort popover,
+ * domain filter ribbon, batch window stashing, star pinning, persistent settings,
+ * JSON/Markdown data export/import, and responsive Side Panel docking.
  */
 
 'use strict';
 
 /**
- * Storage keys
+ * Storage Keys
  */
 const STORAGE_KEY = 'stashedTabs';
 const SETTINGS_KEY = 'userSettings';
 
 /**
- * Average memory consumed per Chromium tab (used for RAM estimation).
+ * Memory Estimator Constant (MB per Chromium tab)
  */
 const AVG_RAM_PER_TAB_MB = 95;
 
@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS = {
 };
 
 /**
- * Restricted schemes that Chromium sandboxes prevent from manipulating.
+ * Schemes blocked by browser security sandbox
  */
 const RESTRICTED_SCHEMES = [
   'chrome://',
@@ -42,7 +42,17 @@ const RESTRICTED_SCHEMES = [
 ];
 
 /**
- * State cache
+ * Friendly labels for sort options
+ */
+const SORT_LABELS = {
+  'date-desc': 'Newest First',
+  'date-asc': 'Oldest First',
+  'domain-asc': 'By Domain',
+  'title-asc': 'By Title (A-Z)'
+};
+
+/**
+ * Active in-memory state
  */
 let cachedTabs = [];
 let cachedSettings = { ...DEFAULT_SETTINGS };
@@ -52,7 +62,7 @@ let snackbarTimeout = null;
 const collapsedFolders = new Set();
 
 /**
- * DOM Elements Cache
+ * Cached DOM references
  */
 const elements = {
   // Views
@@ -62,30 +72,39 @@ const elements = {
   closeSettingsBtn: document.getElementById('closeSettingsBtn'),
   sidePanelBtn: document.getElementById('sidePanelBtn'),
 
-  // Header stats
+  // Header status
   tabCount: document.getElementById('tabCount'),
   ramSavedLabel: document.getElementById('ramSavedLabel'),
 
-  // Primary Actions
+  // Primary Actions & Popover
   stashBtn: document.getElementById('stashBtn'),
-  stashMoreBtn: document.getElementById('stashMoreBtn'),
-  stashDropdownMenu: document.getElementById('stashDropdownMenu'),
+  stashOptionsTrigger: document.getElementById('stashOptionsTrigger'),
+  stashOptionsPopover: document.getElementById('stashOptionsPopover'),
   stashAllWindowBtn: document.getElementById('stashAllWindowBtn'),
   stashOtherTabsBtn: document.getElementById('stashOtherTabsBtn'),
 
-  // Banners & Toolbars
+  // Alert Banner
   alertBanner: document.getElementById('alertBanner'),
   alertMessage: document.getElementById('alertMessage'),
-  toolbarContainer: document.getElementById('toolbarContainer'),
+
+  // Search & Navigation
+  searchNavBar: document.getElementById('searchNavBar'),
   searchInput: document.getElementById('searchInput'),
   clearSearchBtn: document.getElementById('clearSearchBtn'),
   viewGroupedBtn: document.getElementById('viewGroupedBtn'),
   viewFlatBtn: document.getElementById('viewFlatBtn'),
-  sortSelect: document.getElementById('sortSelect'),
-  domainChipsContainer: document.getElementById('domainChipsContainer'),
+
+  // Sort Popover
+  sortTriggerBtn: document.getElementById('sortTriggerBtn'),
+  sortLabelText: document.getElementById('sortLabelText'),
+  sortPopover: document.getElementById('sortPopover'),
+
+  // Domain Filter Ribbon & Scroll Area
+  domainRibbon: document.getElementById('domainRibbon'),
+  listScrollArea: document.getElementById('listScrollArea'),
   stashedListContent: document.getElementById('stashedListContent'),
 
-  // Settings elements
+  // Settings view inputs
   settingGroupByDate: document.getElementById('settingGroupByDate'),
   settingIgnorePinned: document.getElementById('settingIgnorePinned'),
   settingCloseOnStash: document.getElementById('settingCloseOnStash'),
@@ -95,7 +114,7 @@ const elements = {
   importFileInput: document.getElementById('importFileInput'),
   clearAllDataBtn: document.getElementById('clearAllDataBtn'),
 
-  // Modal
+  // Scrim Modal
   clearConfirmModal: document.getElementById('clearConfirmModal'),
   cancelClearBtn: document.getElementById('cancelClearBtn'),
   confirmClearBtn: document.getElementById('confirmClearBtn'),
@@ -127,7 +146,7 @@ async function persistSettings(settings) {
 }
 
 /**
- * URL validation
+ * Checks if URL is restricted by the Chromium sandbox
  */
 function isRestrictedUrl(url) {
   if (!url || typeof url !== 'string') return true;
@@ -135,6 +154,9 @@ function isRestrictedUrl(url) {
   return RESTRICTED_SCHEMES.some((scheme) => lower.startsWith(scheme));
 }
 
+/**
+ * Extracts a clean hostname
+ */
 function getHostname(url) {
   try {
     const parsed = new URL(url);
@@ -145,7 +167,7 @@ function getHostname(url) {
 }
 
 /**
- * Alert & Notification Handlers
+ * Transient alert banner
  */
 function showAlert(message) {
   if (!elements.alertBanner || !elements.alertMessage) return;
@@ -157,6 +179,9 @@ function showAlert(message) {
   }, 3500);
 }
 
+/**
+ * Feedback snackbar with optional undo
+ */
 function showSnackbar(message, showUndo = true) {
   if (!elements.snackbar || !elements.snackbarText) return;
   if (snackbarTimeout) clearTimeout(snackbarTimeout);
@@ -172,7 +197,7 @@ function showSnackbar(message, showUndo = true) {
 }
 
 /**
- * Relative time formatter
+ * Human-readable relative time
  */
 function formatRelativeTime(timestamp) {
   if (!timestamp) return '';
@@ -185,18 +210,18 @@ function formatRelativeTime(timestamp) {
 }
 
 /**
- * SVG Helpers
+ * Fallback globe SVG icon
  */
 function createFallbackIcon() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'item-favicon-fallback');
+  svg.setAttribute('class', 'tab-favicon-fallback');
   svg.setAttribute('viewBox', '0 0 24 24');
   svg.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>';
   return svg;
 }
 
 /**
- * Tab sorting logic
+ * Sorts array of tabs
  */
 function sortTabsList(tabs, sortKey) {
   const copy = [...tabs];
@@ -214,7 +239,7 @@ function sortTabsList(tabs, sortKey) {
 }
 
 /**
- * Date Grouping Partitioning
+ * Partition tabs into chronological folders
  */
 function groupTabsChronologically(tabs) {
   const now = new Date();
@@ -298,7 +323,7 @@ async function handleStashCurrentTab() {
  */
 async function handleStashAllWindows() {
   try {
-    elements.stashDropdownMenu.classList.remove('visible');
+    closeAllPopovers();
     const currentWindow = await chrome.windows.getCurrent({ populate: true });
     if (!currentWindow || !currentWindow.tabs) return;
 
@@ -309,7 +334,7 @@ async function handleStashAllWindows() {
     });
 
     if (eligible.length === 0) {
-      showAlert('No stashable tabs found in this window.');
+      showAlert('No eligible tabs found in this window.');
       return;
     }
 
@@ -337,7 +362,7 @@ async function handleStashAllWindows() {
       await chrome.tabs.remove(ids);
     }
   } catch (err) {
-    console.error('Failed to stash all tabs:', err);
+    console.error('Failed to stash window tabs:', err);
     showAlert('Failed to stash window tabs.');
   }
 }
@@ -347,7 +372,7 @@ async function handleStashAllWindows() {
  */
 async function handleStashOtherTabs() {
   try {
-    elements.stashDropdownMenu.classList.remove('visible');
+    closeAllPopovers();
     const currentWindow = await chrome.windows.getCurrent({ populate: true });
     if (!currentWindow || !currentWindow.tabs) return;
 
@@ -420,7 +445,7 @@ async function handleRestoreTab(id, url) {
 }
 
 /**
- * Restore an Entire Group
+ * Restore an Entire Folder Group
  */
 async function handleRestoreGroup(groupTabs, groupTitle) {
   if (!groupTabs || groupTabs.length === 0) return;
@@ -473,7 +498,7 @@ async function handleDeleteTab(id) {
 }
 
 /**
- * Toggle Pin / Star on Tab
+ * Toggle Star / Pin
  */
 async function handleTogglePin(id) {
   const target = cachedTabs.find((t) => t.id === id);
@@ -486,7 +511,7 @@ async function handleTogglePin(id) {
 }
 
 /**
- * Copy Tab URL
+ * Copy Tab URL to clipboard
  */
 async function handleCopyUrl(url) {
   try {
@@ -498,7 +523,7 @@ async function handleCopyUrl(url) {
 }
 
 /**
- * Reversal / Undo Handler
+ * Reversal / Undo Action
  */
 async function handleUndo() {
   if (!lastUndoAction) return;
@@ -520,10 +545,10 @@ async function handleUndo() {
       await renderUI();
       showSnackbar('Stash undone & tab reopened', false);
     } else if (action === 'stash-batch') {
-      const ids = new Set(tabs.map((t) => t.id));
       for (const t of tabs) {
         if (t.url) await chrome.tabs.create({ url: t.url, active: false });
       }
+      const ids = new Set(tabs.map((t) => t.id));
       const filtered = cachedTabs.filter((t) => !ids.has(t.id));
       await persistTabs(filtered);
       await renderUI();
@@ -551,97 +576,97 @@ async function handleUndo() {
 }
 
 /**
- * Builds Tab Item Element
+ * Builds Individual Tab Card
  */
 function createTabElement(tab) {
-  const listItem = document.createElement('div');
-  listItem.className = `stashed-item ${tab.pinned ? 'is-pinned' : ''}`;
-  listItem.setAttribute('role', 'button');
-  listItem.setAttribute('tabindex', '0');
-  listItem.title = `Click to restore: ${tab.title || tab.url}`;
+  const card = document.createElement('div');
+  card.className = `tab-card ${tab.pinned ? 'is-starred' : ''}`;
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.title = `Click to restore: ${tab.title || tab.url}`;
 
-  // Main details
-  const mainDiv = document.createElement('div');
-  mainDiv.className = 'item-main';
+  // Main Column
+  const mainCol = document.createElement('div');
+  mainCol.className = 'tab-main-col';
 
-  // Favicon
-  const iconWrap = document.createElement('div');
-  iconWrap.className = 'favicon-wrap';
+  // Favicon Box
+  const favBox = document.createElement('div');
+  favBox.className = 'tab-favicon-box';
 
   if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
     const img = document.createElement('img');
-    img.className = 'item-favicon';
+    img.className = 'tab-favicon';
     img.src = tab.favIconUrl;
     img.alt = '';
     img.loading = 'lazy';
     img.onerror = () => {
       img.replaceWith(createFallbackIcon());
     };
-    iconWrap.appendChild(img);
+    favBox.appendChild(img);
   } else {
-    iconWrap.appendChild(createFallbackIcon());
+    favBox.appendChild(createFallbackIcon());
   }
-  mainDiv.appendChild(iconWrap);
+  mainCol.appendChild(favBox);
 
-  // Text group
-  const textGroup = document.createElement('div');
-  textGroup.className = 'item-text-group';
+  // Text Group
+  const infoGroup = document.createElement('div');
+  infoGroup.className = 'tab-info-group';
 
   const titleEl = document.createElement('div');
-  titleEl.className = 'item-title';
+  titleEl.className = 'tab-title-text';
   titleEl.textContent = tab.title || tab.url;
 
-  const metaEl = document.createElement('div');
-  metaEl.className = 'item-meta';
+  const metaRow = document.createElement('div');
+  metaRow.className = 'tab-meta-row';
 
-  const domainTag = document.createElement('span');
-  domainTag.className = 'domain-tag';
-  domainTag.textContent = getHostname(tab.url);
+  const domainSpan = document.createElement('span');
+  domainSpan.className = 'domain-name';
+  domainSpan.textContent = getHostname(tab.url);
 
-  const separator = document.createElement('span');
-  separator.className = 'separator';
-  separator.textContent = '•';
+  const dot = document.createElement('span');
+  dot.className = 'tab-meta-dot';
+  dot.textContent = '•';
 
   const timeSpan = document.createElement('span');
   timeSpan.textContent = formatRelativeTime(tab.stashedAt);
 
-  metaEl.appendChild(domainTag);
-  metaEl.appendChild(separator);
-  metaEl.appendChild(timeSpan);
+  metaRow.appendChild(domainSpan);
+  metaRow.appendChild(dot);
+  metaRow.appendChild(timeSpan);
 
-  textGroup.appendChild(titleEl);
-  textGroup.appendChild(metaEl);
-  mainDiv.appendChild(textGroup);
+  infoGroup.appendChild(titleEl);
+  infoGroup.appendChild(metaRow);
+  mainCol.appendChild(infoGroup);
 
-  // Click to restore
-  mainDiv.addEventListener('click', (e) => {
+  // Click card to restore
+  mainCol.addEventListener('click', (e) => {
     e.stopPropagation();
     handleRestoreTab(tab.id, tab.url);
   });
 
   // Actions
-  const actionsDiv = document.createElement('div');
-  actionsDiv.className = 'item-actions';
+  const actionsGroup = document.createElement('div');
+  actionsGroup.className = 'tab-actions-group';
 
   // Star / Pin Button
-  const pinBtn = document.createElement('button');
-  pinBtn.className = `btn-icon ${tab.pinned ? 'active-star' : ''}`;
-  pinBtn.type = 'button';
-  pinBtn.title = tab.pinned ? 'Unpin tab' : 'Pin to top';
-  pinBtn.setAttribute('aria-label', tab.pinned ? 'Unpin tab' : 'Pin tab');
-  pinBtn.innerHTML = `
+  const starBtn = document.createElement('button');
+  starBtn.className = `action-icon-btn ${tab.pinned ? 'starred' : ''}`;
+  starBtn.type = 'button';
+  starBtn.title = tab.pinned ? 'Unpin tab' : 'Pin to top';
+  starBtn.setAttribute('aria-label', tab.pinned ? 'Unpin tab' : 'Pin tab');
+  starBtn.innerHTML = `
     <svg viewBox="0 0 24 24">
       <path d="${tab.pinned ? 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' : 'M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z'}"/>
     </svg>
   `;
-  pinBtn.addEventListener('click', (e) => {
+  starBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     handleTogglePin(tab.id);
   });
 
-  // Copy Link Button
+  // Copy URL Button
   const copyBtn = document.createElement('button');
-  copyBtn.className = 'btn-icon';
+  copyBtn.className = 'action-icon-btn';
   copyBtn.type = 'button';
   copyBtn.title = 'Copy URL';
   copyBtn.setAttribute('aria-label', 'Copy tab URL');
@@ -657,7 +682,7 @@ function createTabElement(tab) {
 
   // Delete Button
   const deleteBtn = document.createElement('button');
-  deleteBtn.className = 'btn-icon delete';
+  deleteBtn.className = 'action-icon-btn delete';
   deleteBtn.type = 'button';
   deleteBtn.title = 'Remove from stash';
   deleteBtn.setAttribute('aria-label', `Delete ${tab.title || tab.url}`);
@@ -671,69 +696,61 @@ function createTabElement(tab) {
     handleDeleteTab(tab.id);
   });
 
-  actionsDiv.appendChild(pinBtn);
-  actionsDiv.appendChild(copyBtn);
-  actionsDiv.appendChild(deleteBtn);
+  actionsGroup.appendChild(starBtn);
+  actionsGroup.appendChild(copyBtn);
+  actionsGroup.appendChild(deleteBtn);
 
-  listItem.addEventListener('keydown', (e) => {
+  card.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleRestoreTab(tab.id, tab.url);
     }
   });
 
-  listItem.appendChild(mainDiv);
-  listItem.appendChild(actionsDiv);
-  return listItem;
+  card.appendChild(mainCol);
+  card.appendChild(actionsGroup);
+  return card;
 }
 
 /**
- * Builds Accordion Folder Group Element
+ * Builds Accordion Section Group
  */
 function createFolderElement(groupId, title, groupTabs, isPinned = false) {
-  const folder = document.createElement('section');
+  const section = document.createElement('div');
   const isCollapsed = collapsedFolders.has(groupId);
-  folder.className = `folder-group ${isPinned ? 'pinned-group' : ''} ${isCollapsed ? 'collapsed' : ''}`;
+  section.className = `date-section ${isCollapsed ? 'collapsed' : ''}`;
 
   const header = document.createElement('header');
-  header.className = 'folder-header';
+  header.className = 'section-header';
 
-  // Left
-  const left = document.createElement('div');
-  left.className = 'folder-header-left';
+  // Left Title
+  const titleWrap = document.createElement('div');
+  titleWrap.className = 'section-title-wrap';
 
   const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  chevron.setAttribute('class', 'folder-chevron');
+  chevron.setAttribute('class', 'section-chevron');
   chevron.setAttribute('viewBox', '0 0 24 24');
   chevron.innerHTML = '<path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>';
 
-  const titleWrap = document.createElement('div');
-  titleWrap.className = 'folder-title-wrap';
-
   const titleEl = document.createElement('span');
-  titleEl.className = 'folder-title';
+  titleEl.className = 'section-title';
   titleEl.textContent = title;
 
-  const countPill = document.createElement('span');
-  countPill.className = 'folder-pill';
-  countPill.textContent = `${groupTabs.length} tab${groupTabs.length > 1 ? 's' : ''}`;
+  const countBadge = document.createElement('span');
+  countBadge.className = 'section-badge';
+  countBadge.textContent = `${groupTabs.length}`;
 
+  titleWrap.appendChild(chevron);
   titleWrap.appendChild(titleEl);
-  titleWrap.appendChild(countPill);
+  titleWrap.appendChild(countBadge);
 
-  left.appendChild(chevron);
-  left.appendChild(titleWrap);
-
-  // Right
-  const right = document.createElement('div');
-  right.className = 'folder-header-right';
-
+  // Right Restore Button
   const restoreBtn = document.createElement('button');
-  restoreBtn.className = 'btn-folder-action';
+  restoreBtn.className = 'btn-section-restore';
   restoreBtn.type = 'button';
-  restoreBtn.title = `Restore all ${groupTabs.length} tabs in ${title}`;
+  restoreBtn.title = `Restore all tabs in ${title}`;
   restoreBtn.innerHTML = `
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+    <svg viewBox="0 0 24 24">
       <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
     </svg>
     <span>Restore</span>
@@ -743,45 +760,39 @@ function createFolderElement(groupId, title, groupTabs, isPinned = false) {
     handleRestoreGroup(groupTabs, title);
   });
 
-  right.appendChild(restoreBtn);
-
-  header.appendChild(left);
-  header.appendChild(right);
+  header.appendChild(titleWrap);
+  header.appendChild(restoreBtn);
 
   // Accordion toggle
   header.addEventListener('click', () => {
     if (collapsedFolders.has(groupId)) {
       collapsedFolders.delete(groupId);
-      folder.classList.remove('collapsed');
+      section.classList.remove('collapsed');
     } else {
       collapsedFolders.add(groupId);
-      folder.classList.add('collapsed');
+      section.classList.add('collapsed');
     }
   });
 
-  // Body
-  const body = document.createElement('div');
-  body.className = 'folder-body';
-
-  const bodyInner = document.createElement('div');
-  bodyInner.className = 'folder-body-inner';
+  // Body container
+  const content = document.createElement('div');
+  content.className = 'section-content';
 
   groupTabs.forEach((tab) => {
-    bodyInner.appendChild(createTabElement(tab));
+    content.appendChild(createTabElement(tab));
   });
 
-  body.appendChild(bodyInner);
-  folder.appendChild(header);
-  folder.appendChild(body);
+  section.appendChild(header);
+  section.appendChild(content);
 
-  return folder;
+  return section;
 }
 
 /**
- * Domain filter chips builder
+ * Builds Domain Filter Ribbon
  */
-function renderDomainChips(tabs) {
-  const container = elements.domainChipsContainer;
+function renderDomainRibbon(tabs) {
+  const container = elements.domainRibbon;
   if (!container) return;
 
   if (tabs.length < 3) {
@@ -790,7 +801,6 @@ function renderDomainChips(tabs) {
     return;
   }
 
-  // Count domains
   const counts = {};
   for (const t of tabs) {
     const domain = getHostname(t.url);
@@ -799,7 +809,7 @@ function renderDomainChips(tabs) {
 
   const sortedDomains = Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 7);
+    .slice(0, 6);
 
   if (sortedDomains.length <= 1) {
     container.classList.remove('visible');
@@ -821,7 +831,7 @@ function renderDomainChips(tabs) {
   });
   container.appendChild(allChip);
 
-  // Individual chips
+  // Top domain chips
   for (const [domain, count] of sortedDomains) {
     const chip = document.createElement('button');
     chip.className = `domain-chip ${activeDomainFilter === domain ? 'active' : ''}`;
@@ -836,22 +846,50 @@ function renderDomainChips(tabs) {
 }
 
 /**
+ * Close any active popovers
+ */
+function closeAllPopovers() {
+  if (elements.stashOptionsPopover) {
+    elements.stashOptionsPopover.classList.remove('visible');
+  }
+  if (elements.stashOptionsTrigger) {
+    elements.stashOptionsTrigger.classList.remove('active');
+    elements.stashOptionsTrigger.setAttribute('aria-expanded', 'false');
+  }
+  if (elements.sortPopover) {
+    elements.sortPopover.classList.remove('visible');
+  }
+  if (elements.sortTriggerBtn) {
+    elements.sortTriggerBtn.setAttribute('aria-expanded', 'false');
+  }
+}
+
+/**
  * Master UI Render Engine
  */
 async function renderUI() {
-  const { stashedListContent, tabCount, ramSavedLabel, sortSelect, searchInput } = elements;
+  const { stashedListContent, tabCount, ramSavedLabel, searchInput } = elements;
   if (!stashedListContent) return;
 
   const totalCount = cachedTabs.length;
 
-  // Header Counters
-  if (tabCount) tabCount.textContent = String(totalCount);
+  // Header status counters
+  if (tabCount) tabCount.textContent = `${totalCount} tab${totalCount !== 1 ? 's' : ''}`;
   if (ramSavedLabel) {
     const ramMb = totalCount * AVG_RAM_PER_TAB_MB;
-    ramSavedLabel.textContent = totalCount > 0 ? `~${ramMb} MB freed` : '0 MB freed';
+    if (ramMb >= 1000) {
+      ramSavedLabel.textContent = `~${(ramMb / 1024).toFixed(1)} GB freed`;
+    } else {
+      ramSavedLabel.textContent = `~${ramMb} MB freed`;
+    }
   }
 
-  // Query and domain filtering
+  // Update sort label text
+  if (elements.sortLabelText) {
+    elements.sortLabelText.textContent = SORT_LABELS[cachedSettings.sortBy] || 'Newest First';
+  }
+
+  // Query & Domain filtering
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
   let filtered = [...cachedTabs];
 
@@ -863,46 +901,45 @@ async function renderUI() {
     filtered = filtered.filter((t) => (t.title && t.title.toLowerCase().includes(query)) || (t.url && t.url.toLowerCase().includes(query)));
   }
 
-  // Domain Filter Chips
-  renderDomainChips(cachedTabs);
+  // Domain Filter Ribbon
+  renderDomainRibbon(cachedTabs);
 
-  // Sync sort dropdown
-  const sortMode = sortSelect ? sortSelect.value : cachedSettings.sortBy;
-  filtered = sortTabsList(filtered, sortMode);
+  // Apply sorting
+  filtered = sortTabsList(filtered, cachedSettings.sortBy);
 
-  // Clear previous markup
+  // Clear previous list
   stashedListContent.innerHTML = '';
 
   // Empty state guard
   if (totalCount === 0) {
     const emptyState = document.createElement('div');
-    emptyState.className = 'empty-state';
+    emptyState.className = 'empty-state-view';
     emptyState.innerHTML = `
-      <div class="empty-illustration">
+      <div class="empty-icon-wrap">
         <svg viewBox="0 0 24 24">
           <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
         </svg>
       </div>
-      <span class="empty-title">Your stash is clean</span>
-      <span class="empty-subtitle">Click "Stash Current Tab" or press <kbd>Alt+Shift+S</kbd> to free up RAM.</span>
+      <span class="empty-heading">No Stashed Tabs</span>
+      <span class="empty-detail">Stash open tabs to clear browser clutter and instantly free system RAM.</span>
     `;
     stashedListContent.appendChild(emptyState);
     return;
   }
 
-  // Filter with no matches
+  // Search no match
   if (filtered.length === 0) {
     const noMatch = document.createElement('div');
-    noMatch.className = 'empty-state';
+    noMatch.className = 'empty-state-view';
     noMatch.innerHTML = `
-      <span class="empty-title">No matching tabs</span>
-      <span class="empty-subtitle">Try adjusting your search query or domain filter.</span>
+      <span class="empty-heading">No Matching Tabs</span>
+      <span class="empty-detail">No tabs match your active query or domain filter.</span>
     `;
     stashedListContent.appendChild(noMatch);
     return;
   }
 
-  // Render Folders vs Flat List
+  // Render Folders vs Flat View
   if (cachedSettings.groupByDate && !query) {
     const groups = groupTabsChronologically(filtered);
 
@@ -934,7 +971,7 @@ async function renderUI() {
   } else {
     // Flat List View
     const flatList = document.createElement('div');
-    flatList.className = 'stashed-list-flat';
+    flatList.className = 'flat-list-group';
     filtered.forEach((tab) => {
       flatList.appendChild(createTabElement(tab));
     });
@@ -943,7 +980,7 @@ async function renderUI() {
 }
 
 /**
- * Export stashed tabs to JSON
+ * Export JSON backup
  */
 function handleExportJSON() {
   const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cachedTabs, null, 2));
@@ -958,7 +995,7 @@ function handleExportJSON() {
 }
 
 /**
- * Export stashed tabs to Markdown bookmarks
+ * Export Markdown bookmarks
  */
 function handleExportMarkdown() {
   const lines = ['# Live Tab Stasher Bookmarks\n'];
@@ -987,7 +1024,7 @@ async function handleImportFile(file) {
     const text = await file.text();
     const imported = JSON.parse(text);
     if (!Array.isArray(imported)) {
-      showAlert('Invalid JSON format: Expected an array of tabs.');
+      showAlert('Invalid JSON format: Expected array of tabs.');
       return;
     }
 
@@ -1019,7 +1056,7 @@ async function handleImportFile(file) {
 }
 
 /**
- * Side panel opener
+ * Chrome Side Panel Docking
  */
 async function handleOpenSidePanel() {
   try {
@@ -1037,29 +1074,29 @@ async function handleOpenSidePanel() {
 }
 
 /**
- * Event Listeners & Initialization
+ * Event Listeners & Bootstrapping
  */
 document.addEventListener('DOMContentLoaded', async () => {
   await loadStoredData();
 
-  // Primary Stash Click
+  // Primary Stash Active Tab
   if (elements.stashBtn) {
     elements.stashBtn.addEventListener('click', handleStashCurrentTab);
   }
 
-  // Dropdown toggle
-  if (elements.stashMoreBtn) {
-    elements.stashMoreBtn.addEventListener('click', (e) => {
+  // Stash Options Trigger
+  if (elements.stashOptionsTrigger) {
+    elements.stashOptionsTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      elements.stashDropdownMenu.classList.toggle('visible');
+      const isVisible = elements.stashOptionsPopover.classList.contains('visible');
+      closeAllPopovers();
+      if (!isVisible) {
+        elements.stashOptionsPopover.classList.add('visible');
+        elements.stashOptionsTrigger.classList.add('active');
+        elements.stashOptionsTrigger.setAttribute('aria-expanded', 'true');
+      }
     });
   }
-
-  document.addEventListener('click', (e) => {
-    if (elements.stashDropdownMenu && !elements.stashDropdownMenu.contains(e.target)) {
-      elements.stashDropdownMenu.classList.remove('visible');
-    }
-  });
 
   if (elements.stashAllWindowBtn) {
     elements.stashAllWindowBtn.addEventListener('click', handleStashAllWindows);
@@ -1069,17 +1106,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.stashOtherTabsBtn.addEventListener('click', handleStashOtherTabs);
   }
 
+  // Sort Popover Trigger
+  if (elements.sortTriggerBtn) {
+    elements.sortTriggerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = elements.sortPopover.classList.contains('visible');
+      closeAllPopovers();
+      if (!isVisible) {
+        elements.sortPopover.classList.add('visible');
+        elements.sortTriggerBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  if (elements.sortPopover) {
+    elements.sortPopover.querySelectorAll('.popover-item').forEach((item) => {
+      item.addEventListener('click', async (e) => {
+        const sortKey = e.currentTarget.getAttribute('data-sort');
+        if (sortKey) {
+          await persistSettings({ sortBy: sortKey });
+          closeAllPopovers();
+          renderUI();
+        }
+      });
+    });
+  }
+
+  // Global dismiss popovers on click outside
+  document.addEventListener('click', (e) => {
+    if (elements.stashOptionsPopover && !elements.stashOptionsPopover.contains(e.target) && e.target !== elements.stashOptionsTrigger) {
+      elements.stashOptionsPopover.classList.remove('visible');
+      if (elements.stashOptionsTrigger) {
+        elements.stashOptionsTrigger.classList.remove('active');
+        elements.stashOptionsTrigger.setAttribute('aria-expanded', 'false');
+      }
+    }
+    if (elements.sortPopover && !elements.sortPopover.contains(e.target) && e.target !== elements.sortTriggerBtn) {
+      elements.sortPopover.classList.remove('visible');
+      if (elements.sortTriggerBtn) {
+        elements.sortTriggerBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
   // Side Panel Trigger
   if (elements.sidePanelBtn) {
     elements.sidePanelBtn.addEventListener('click', handleOpenSidePanel);
   }
 
-  // Navigation: Settings View
+  // Settings View Navigation
   if (elements.openSettingsBtn) {
     elements.openSettingsBtn.addEventListener('click', () => {
+      closeAllPopovers();
       elements.mainView.classList.add('hidden');
       elements.settingsView.classList.remove('hidden');
-      // Sync form switches with active settings
       elements.settingGroupByDate.checked = cachedSettings.groupByDate;
       elements.settingIgnorePinned.checked = cachedSettings.ignorePinnedTabs;
       elements.settingCloseOnStash.checked = cachedSettings.closeOnStash;
@@ -1094,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // View Mode: Grouped vs Flat
+  // View Mode: Folders vs Flat
   if (elements.viewGroupedBtn && elements.viewFlatBtn) {
     elements.viewGroupedBtn.addEventListener('click', async () => {
       elements.viewGroupedBtn.classList.add('active');
@@ -1117,15 +1197,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       elements.viewFlatBtn.classList.add('active');
       elements.viewGroupedBtn.classList.remove('active');
     }
-  }
-
-  // Sort Selector
-  if (elements.sortSelect) {
-    elements.sortSelect.value = cachedSettings.sortBy || 'date-desc';
-    elements.sortSelect.addEventListener('change', async (e) => {
-      await persistSettings({ sortBy: e.target.value });
-      renderUI();
-    });
   }
 
   // Search Input & Shortcuts
@@ -1214,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Clear All Modal Dialog
+  // Purge Modal
   if (elements.clearAllDataBtn) {
     elements.clearAllDataBtn.addEventListener('click', () => {
       elements.clearConfirmModal.classList.add('visible');

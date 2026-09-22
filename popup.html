@@ -6,73 +6,81 @@
   <title>Live Tab Stasher</title>
   <style>
     :root {
-      /* Base Theme Tokens - Light Mode */
-      --color-bg: #f8fafc;
-      --color-surface: #ffffff;
-      --color-surface-hover: #f1f5f9;
-      --color-surface-container: #edf2f7;
-      --color-surface-container-high: #e2e8f0;
-      --color-surface-glass: rgba(255, 255, 255, 0.85);
-      --color-border: #e2e8f0;
-      --color-border-subtle: #f1f5f9;
-      --color-text-primary: #0f172a;
-      --color-text-secondary: #475569;
-      --color-text-tertiary: #94a3b8;
-      
-      --color-primary: #4f46e5;
-      --color-primary-hover: #4338ca;
-      --color-primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      --color-primary-container: #e0e7ff;
-      --color-on-primary-container: #3730a3;
-      
-      --color-accent-emerald: #10b981;
-      --color-accent-amber: #f59e0b;
-      --color-error: #ef4444;
-      --color-error-container: #fee2e2;
-      --color-on-error-container: #991b1b;
+      /* Studio Obsidian Pro Dark Theme */
+      --bg-base: #09090b;
+      --bg-surface: #121215;
+      --bg-surface-elevated: #18181d;
+      --bg-surface-hover: #1f1f26;
+      --bg-surface-active: #272732;
+      --bg-glass: rgba(14, 14, 18, 0.88);
 
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-      
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --border-default: rgba(255, 255, 255, 0.09);
+      --border-active: rgba(255, 255, 255, 0.16);
+      --border-focus: rgba(99, 102, 241, 0.45);
+
+      --text-primary: #f4f4f6;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --text-faint: #52525b;
+
+      --accent-primary: #4f46e5;
+      --accent-primary-hover: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+      --accent-glow: 0 0 16px rgba(79, 70, 229, 0.35);
+
+      --accent-emerald: #10b981;
+      --accent-emerald-dim: rgba(16, 185, 129, 0.14);
+      --accent-amber: #f59e0b;
+      --accent-amber-dim: rgba(245, 158, 11, 0.14);
+      --accent-rose: #f43f5e;
+      --accent-rose-dim: rgba(244, 63, 94, 0.14);
+
+      --radius-xs: 4px;
       --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
+      --radius-md: 9px;
+      --radius-lg: 12px;
       --radius-full: 9999px;
-      
-      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+
+      --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      --shadow-popover: 0 12px 32px -4px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1);
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Geist", sans-serif;
     }
 
-    @media (prefers-color-scheme: dark) {
+    @media (prefers-color-scheme: light) {
       :root {
-        /* Base Theme Tokens - Modern Dark Obsidian */
-        --color-bg: #090a10;
-        --color-surface: #111420;
-        --color-surface-hover: #181d2e;
-        --color-surface-container: #161928;
-        --color-surface-container-high: #21263c;
-        --color-surface-glass: rgba(17, 20, 32, 0.88);
-        --color-border: rgba(255, 255, 255, 0.08);
-        --color-border-subtle: rgba(255, 255, 255, 0.04);
-        --color-text-primary: #f8fafc;
-        --color-text-secondary: #94a3b8;
-        --color-text-tertiary: #64748b;
-        
-        --color-primary: #6366f1;
-        --color-primary-hover: #4f46e5;
-        --color-primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        --color-primary-container: rgba(99, 102, 241, 0.16);
-        --color-on-primary-container: #c7d2fe;
-        
-        --color-accent-emerald: #34d399;
-        --color-accent-amber: #fbbf24;
-        --color-error: #f87171;
-        --color-error-container: rgba(239, 68, 68, 0.16);
-        --color-on-error-container: #fca5a5;
+        --bg-base: #f8fafc;
+        --bg-surface: #ffffff;
+        --bg-surface-elevated: #f1f5f9;
+        --bg-surface-hover: #e2e8f0;
+        --bg-surface-active: #cbd5e1;
+        --bg-glass: rgba(255, 255, 255, 0.92);
 
-        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
-        --shadow-lg: 0 12px 24px 0 rgba(0, 0, 0, 0.55);
+        --border-subtle: rgba(0, 0, 0, 0.05);
+        --border-default: rgba(0, 0, 0, 0.09);
+        --border-active: rgba(0, 0, 0, 0.16);
+        --border-focus: rgba(79, 70, 229, 0.4);
+
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --text-faint: #94a3b8;
+
+        --accent-primary: #4f46e5;
+        --accent-primary-hover: #4338ca;
+        --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+        --accent-glow: 0 0 16px rgba(79, 70, 229, 0.2);
+
+        --accent-emerald: #059669;
+        --accent-emerald-dim: rgba(5, 150, 105, 0.12);
+        --accent-amber: #d97706;
+        --accent-amber-dim: rgba(217, 119, 6, 0.12);
+        --accent-rose: #e11d48;
+        --accent-rose-dim: rgba(225, 29, 72, 0.12);
+
+        --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-popover: 0 10px 25px -3px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
       }
     }
 
@@ -82,19 +90,28 @@
       padding: 0;
     }
 
-    body {
-      width: 380px;
-      min-height: 280px;
-      max-height: 590px;
-      font-family: var(--font-stack);
-      background-color: var(--color-bg);
-      color: var(--color-text-primary);
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      overflow-y: hidden;
+    html, body {
+      width: 400px;
+      height: 580px;
+      min-width: 360px;
+      max-width: 100vw;
+      min-height: 500px;
+      max-height: 100vh;
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      overflow: hidden;
       user-select: none;
-      position: relative;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Side Panel Fullscreen Adaptation */
+    @media screen and (min-width: 450px) {
+      html, body {
+        width: 100vw;
+        height: 100vh;
+      }
     }
 
     /* Views Layout Container */
@@ -104,7 +121,6 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      flex: 1;
       overflow: hidden;
     }
 
@@ -113,86 +129,106 @@
       flex-direction: column;
       height: 100%;
       width: 100%;
-      flex: 1;
       overflow: hidden;
-      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
     }
 
     .view-page.hidden {
       display: none;
     }
 
-    /* Header Bar */
+    /* Top App Header */
     .app-header {
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--color-border);
-      background-color: var(--color-surface-glass);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 20;
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      flex-shrink: 0;
+      z-index: 25;
     }
 
     .app-branding {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
+    }
+
+    .app-icon-wrap {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-default);
     }
 
     .app-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 7px;
-      object-fit: contain;
-      box-shadow: var(--shadow-sm);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .app-title-group {
       display: flex;
       flex-direction: column;
+      gap: 1px;
     }
 
     .app-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: -0.2px;
-      color: var(--color-text-primary);
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
       line-height: 1.2;
     }
 
-    .app-stats-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--color-text-secondary);
-    }
-
-    .ram-saved-badge {
-      color: var(--color-accent-emerald);
-      font-weight: 500;
+    .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-emerald);
+      letter-spacing: -0.01em;
+    }
+
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: var(--accent-emerald);
+      box-shadow: 0 0 6px var(--accent-emerald);
+    }
+
+    .status-separator {
+      color: var(--text-faint);
+      font-size: 10px;
+    }
+
+    .status-count {
+      color: var(--text-muted);
+      font-weight: 400;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
-    .header-icon-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: var(--radius-md);
+    .header-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
       border: 1px solid transparent;
       background: transparent;
-      color: var(--color-text-secondary);
+      color: var(--text-secondary);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -200,189 +236,182 @@
       transition: all 0.15s ease;
     }
 
-    .header-icon-btn:hover {
-      background-color: var(--color-surface-hover);
-      color: var(--color-text-primary);
-      border-color: var(--color-border);
+    .header-btn:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
     }
 
-    .header-icon-btn.active {
-      background-color: var(--color-primary-container);
-      color: var(--color-on-primary-container);
-      border-color: transparent;
-    }
-
-    .header-icon-btn svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
-    }
-
-    .badge-count {
-      background-color: var(--color-primary-container);
-      color: var(--color-on-primary-container);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: var(--radius-full);
-      display: inline-flex;
-      align-items: center;
-    }
-
-    /* Stash Action Panel */
-    .action-panel {
-      padding: 12px 16px 8px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background-color: var(--color-surface);
-      border-bottom: 1px solid var(--color-border-subtle);
-    }
-
-    .button-group-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .btn-primary-stash {
-      flex: 1;
-      height: 40px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      border-radius: var(--radius-md);
-      background: var(--color-primary-gradient);
-      color: #ffffff;
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: -0.1px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
-      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .btn-primary-stash:hover {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
-    }
-
-    .btn-primary-stash:active {
-      transform: translateY(0);
-    }
-
-    .btn-primary-stash svg {
-      width: 17px;
-      height: 17px;
-      fill: currentColor;
-    }
-
-    .btn-secondary-dropdown {
-      position: relative;
-    }
-
-    .btn-secondary-stash {
-      height: 40px;
-      padding: 0 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      background-color: var(--color-surface-hover);
-      color: var(--color-text-primary);
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .btn-secondary-stash:hover {
-      background-color: var(--color-surface-container-high);
-      border-color: var(--color-primary);
-    }
-
-    .btn-secondary-stash svg {
+    .header-btn svg {
       width: 15px;
       height: 15px;
       fill: currentColor;
     }
 
-    /* Dropdown Menu */
-    .dropdown-menu {
+    /* Unified Hero Action Bar */
+    .hero-action-panel {
+      padding: 10px 14px 10px 14px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .unified-button-group {
+      display: flex;
+      align-items: stretch;
+      border-radius: var(--radius-md);
+      overflow: visible;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+
+    .btn-stash-active {
+      flex: 1;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-right: none;
+      border-radius: var(--radius-md) 0 0 var(--radius-md);
+      background: var(--accent-gradient);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-stash-active:hover {
+      filter: brightness(1.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), var(--accent-glow);
+    }
+
+    .btn-stash-active:active {
+      transform: scale(0.995);
+    }
+
+    .btn-stash-active svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .btn-stash-options-trigger {
+      width: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-left: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      background: var(--accent-gradient);
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-stash-options-trigger:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-stash-options-trigger svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-stash-options-trigger.active svg {
+      transform: rotate(180deg);
+    }
+
+    /* Popover Menu */
+    .popover-menu {
       position: absolute;
       top: calc(100% + 6px);
       right: 0;
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
+      background-color: var(--bg-surface-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-popover);
       padding: 5px;
       display: none;
       flex-direction: column;
-      min-width: 190px;
-      z-index: 50;
+      min-width: 220px;
+      z-index: 60;
       animation: popIn 0.15s cubic-bezier(0, 0, 0.2, 1);
     }
 
-    .dropdown-menu.visible {
+    .popover-menu.visible {
       display: flex;
     }
 
-    .dropdown-item {
-      padding: 8px 12px;
+    .popover-item {
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 500;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       cursor: pointer;
       background: transparent;
       border: none;
       text-align: left;
       width: 100%;
-      transition: background-color 0.15s;
+      transition: background-color 0.12s ease;
     }
 
-    .dropdown-item:hover {
-      background-color: var(--color-surface-hover);
-      color: var(--color-primary);
+    .popover-item:hover {
+      background-color: var(--bg-surface-hover);
+      color: #ffffff;
     }
 
-    .dropdown-item svg {
+    .popover-item svg {
       width: 15px;
       height: 15px;
-      fill: currentColor;
+      fill: var(--text-secondary);
       flex-shrink: 0;
     }
 
-    .dropdown-item .subtext {
+    .popover-item:hover svg {
+      fill: var(--accent-primary-hover);
+    }
+
+    .popover-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .popover-title {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .popover-desc {
       font-size: 10.5px;
-      color: var(--color-text-tertiary);
-      display: block;
+      color: var(--text-muted);
     }
 
     /* Alert Banner */
     .alert-banner {
       display: none;
-      margin: 8px 16px 0 16px;
-      padding: 8px 12px;
-      background-color: var(--color-error-container);
-      color: var(--color-on-error-container);
+      margin: 8px 14px 0 14px;
+      padding: 7px 10px;
+      background-color: var(--accent-rose-dim);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: var(--accent-rose);
       border-radius: var(--radius-md);
       font-size: 11.5px;
-      line-height: 1.4;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       animation: slideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
 
@@ -391,384 +420,376 @@
     }
 
     .alert-banner svg {
-      flex-shrink: 0;
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       fill: currentColor;
+      flex-shrink: 0;
     }
 
-    /* Filter Toolbar */
-    .toolbar-container {
+    /* Raycast-style Search & Navigation Bar */
+    .search-nav-bar {
+      padding: 8px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 8px 16px 8px 16px;
-      background-color: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
+      gap: 7px;
+      background-color: var(--bg-base);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
     }
 
-    .toolbar-search-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .search-box {
-      flex: 1;
+    .search-input-wrap {
       position: relative;
       display: flex;
       align-items: center;
+      width: 100%;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      width: 13px;
+      height: 13px;
+      fill: var(--text-faint);
+      pointer-events: none;
     }
 
     .search-input {
       width: 100%;
       height: 32px;
-      padding: 0 28px 0 32px;
-      background-color: var(--color-surface-container);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-full);
+      padding: 0 28px 0 30px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
       font-family: inherit;
       font-size: 12px;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
       outline: none;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-faint);
     }
 
     .search-input:focus {
-      border-color: var(--color-primary);
-      background-color: var(--color-surface);
-      box-shadow: 0 0 0 3px var(--color-primary-container);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+      background-color: var(--bg-surface-elevated);
     }
 
-    .search-box svg.search-icon {
-      position: absolute;
-      left: 10px;
-      width: 14px;
-      height: 14px;
-      fill: var(--color-text-tertiary);
-      pointer-events: none;
-    }
-
-    .btn-clear-search {
+    .search-clear-btn {
       display: none;
       position: absolute;
-      right: 8px;
-      width: 16px;
-      height: 16px;
+      right: 7px;
+      width: 18px;
+      height: 18px;
       border: none;
       background: transparent;
+      color: var(--text-faint);
       cursor: pointer;
-      color: var(--color-text-tertiary);
-      padding: 0;
       align-items: center;
       justify-content: center;
+      border-radius: 50%;
     }
 
-    .btn-clear-search.visible {
+    .search-clear-btn.visible {
       display: flex;
     }
 
-    .btn-clear-search svg {
-      width: 14px;
-      height: 14px;
+    .search-clear-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .search-clear-btn svg {
+      width: 12px;
+      height: 12px;
       fill: currentColor;
     }
 
-    /* Controls Strip: Group Toggle + Sort Mode */
-    .toolbar-controls-row {
+    /* Controls Strip: Mode Toggle + Sort Dropdown */
+    .controls-strip {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .segmented-toggle {
+    /* Apple-style Segmented View Switcher */
+    .segmented-control {
       display: inline-flex;
-      background-color: var(--color-surface-container);
-      border-radius: var(--radius-full);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
       padding: 2px;
-      border: 1px solid var(--color-border);
+      gap: 2px;
     }
 
-    .segment-btn {
+    .segment-item {
       border: none;
       background: transparent;
-      padding: 3px 9px;
+      padding: 3px 8px;
       font-size: 11px;
       font-weight: 500;
-      color: var(--color-text-secondary);
-      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      border-radius: var(--radius-xs);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
     }
 
-    .segment-btn.active {
-      background-color: var(--color-surface);
-      color: var(--color-primary);
+    .segment-item:hover {
+      color: var(--text-secondary);
+    }
+
+    .segment-item.active {
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-primary);
       font-weight: 600;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
-    .segment-btn svg {
-      width: 12px;
-      height: 12px;
+    .segment-item svg {
+      width: 11px;
+      height: 11px;
       fill: currentColor;
     }
 
-    .sort-select-wrap {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background-color: var(--color-surface-container);
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
-      border: 1px solid var(--color-border);
+    /* Custom Sort Trigger */
+    .sort-control-wrap {
+      position: relative;
     }
 
-    .sort-select-wrap svg {
-      width: 12px;
-      height: 12px;
-      fill: var(--color-text-secondary);
-    }
-
-    .sort-select {
-      background: transparent;
-      border: none;
+    .sort-trigger-btn {
+      height: 24px;
+      padding: 0 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface);
+      color: var(--text-secondary);
       font-family: inherit;
       font-size: 11px;
       font-weight: 500;
-      color: var(--color-text-primary);
-      outline: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       cursor: pointer;
+      transition: all 0.15s ease;
     }
 
-    /* Domain Filter Chips */
-    .domain-chips-strip {
+    .sort-trigger-btn:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    .sort-trigger-btn svg {
+      width: 11px;
+      height: 11px;
+      fill: currentColor;
+    }
+
+    /* Fixed Domain Filter Ribbon */
+    .domain-ribbon-container {
       display: none;
-      padding: 0 16px 8px 16px;
-      gap: 6px;
+      padding: 6px 14px 6px 14px;
+      background-color: var(--bg-base);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
       overflow-x: auto;
       scrollbar-width: none;
-      background-color: var(--color-surface);
-      border-bottom: 1px solid var(--color-border-subtle);
     }
 
-    .domain-chips-strip::-webkit-scrollbar {
+    .domain-ribbon-container::-webkit-scrollbar {
       display: none;
     }
 
-    .domain-chips-strip.visible {
+    .domain-ribbon-container.visible {
       display: flex;
+      gap: 5px;
     }
 
     .domain-chip {
-      background-color: var(--color-surface-container);
-      color: var(--color-text-secondary);
-      border: 1px solid var(--color-border);
+      height: 22px;
+      padding: 0 8px;
+      background-color: var(--bg-surface);
+      color: var(--text-muted);
+      border: 1px solid var(--border-default);
       border-radius: var(--radius-full);
-      padding: 2px 9px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-
-    .domain-chip:hover {
-      background-color: var(--color-surface-container-high);
-      color: var(--color-text-primary);
-    }
-
-    .domain-chip.active {
-      background-color: var(--color-primary-container);
-      color: var(--color-on-primary-container);
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    /* Stashed List Container */
-    .list-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 12px 12px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .list-wrapper::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    .list-wrapper::-webkit-scrollbar-thumb {
-      background-color: var(--color-surface-container-high);
-      border-radius: var(--radius-full);
-    }
-
-    /* Accordion Date Folders */
-    .folder-group {
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      background-color: var(--color-surface);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .folder-group.pinned-group {
-      border-color: rgba(99, 102, 241, 0.35);
-      background-color: rgba(99, 102, 241, 0.03);
-    }
-
-    .folder-header {
-      padding: 9px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      background-color: var(--color-surface);
-      user-select: none;
-      transition: background-color 0.15s;
-    }
-
-    .folder-header:hover {
-      background-color: var(--color-surface-hover);
-    }
-
-    .folder-header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .folder-chevron {
-      width: 14px;
-      height: 14px;
-      fill: var(--color-text-tertiary);
-      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
-    }
-
-    .folder-group.collapsed .folder-chevron {
-      transform: rotate(-90deg);
-    }
-
-    .folder-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .folder-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--color-text-primary);
-      letter-spacing: -0.1px;
-    }
-
-    .folder-pill {
-      font-size: 10px;
-      font-weight: 500;
-      padding: 1px 6px;
-      border-radius: var(--radius-full);
-      background-color: var(--color-surface-container);
-      color: var(--color-text-secondary);
-    }
-
-    .folder-header-right {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn-folder-action {
-      background: transparent;
-      border: none;
-      color: var(--color-primary);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 7px;
-      border-radius: var(--radius-sm);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: background-color 0.15s;
+      white-space: nowrap;
+      transition: all 0.12s ease;
+      flex-shrink: 0;
     }
 
-    .btn-folder-action:hover {
-      background-color: var(--color-primary-container);
+    .domain-chip:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-secondary);
+      border-color: var(--border-active);
     }
 
-    .folder-body {
-      display: grid;
-      grid-template-rows: 1fr;
-      transition: grid-template-rows 0.2s cubic-bezier(0.2, 0, 0, 1);
-      border-top: 1px solid var(--color-border-subtle);
+    .domain-chip.active {
+      background-color: var(--accent-emerald-dim);
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.4);
+      font-weight: 600;
     }
 
-    .folder-group.collapsed .folder-body {
-      grid-template-rows: 0fr;
-      border-top-color: transparent;
-    }
-
-    .folder-body-inner {
-      overflow: hidden;
+    /* Stashed List Scroll Container */
+    .list-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px 14px 14px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      padding: 6px 8px 8px 8px;
+      gap: 12px;
     }
 
-    /* Flat list container */
-    .stashed-list-flat {
+    .list-scroll-area::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .list-scroll-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .list-scroll-area::-webkit-scrollbar-thumb {
+      background-color: var(--border-default);
+      border-radius: var(--radius-full);
+    }
+
+    /* Clean Linear-style Section Folders */
+    .date-section {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      list-style: none;
+      gap: 4px;
     }
 
-    /* Card Item */
-    .stashed-item {
+    .section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 10px;
+      padding: 4px 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-chevron {
+      width: 12px;
+      height: 12px;
+      fill: var(--text-faint);
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .date-section.collapsed .section-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .section-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 5px;
+      border-radius: var(--radius-full);
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-section-restore {
+      background: transparent;
+      border: none;
+      color: var(--accent-primary-hover);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: background-color 0.12s ease;
+    }
+
+    .btn-section-restore:hover {
+      background-color: rgba(99, 102, 241, 0.14);
+    }
+
+    .btn-section-restore svg {
+      width: 10px;
+      height: 10px;
+      fill: currentColor;
+    }
+
+    /* Folder Accordion Body */
+    .section-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+      transition: max-height 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+    }
+
+    .date-section.collapsed .section-content {
+      display: none;
+    }
+
+    /* Polished Tab Row Card */
+    .tab-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 9px;
       border-radius: var(--radius-md);
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: all 0.15s ease;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.12s ease;
       cursor: pointer;
       position: relative;
     }
 
-    .stashed-item:hover {
-      background-color: var(--color-surface-hover);
-      border-color: var(--color-primary-container);
+    .tab-card:hover {
+      background-color: var(--bg-surface-elevated);
+      border-color: var(--border-active);
       transform: translateX(1px);
     }
 
-    .stashed-item.is-pinned {
-      border-left: 3px solid var(--color-accent-amber);
+    .tab-card.is-starred {
+      border-left: 2.5px solid var(--accent-amber);
     }
 
-    .item-main {
+    .tab-main-col {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       min-width: 0;
       flex: 1;
     }
 
-    .favicon-wrap {
-      width: 26px;
-      height: 26px;
-      border-radius: 7px;
-      background-color: var(--color-surface-container);
-      border: 1px solid var(--color-border-subtle);
+    .tab-favicon-box {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -776,19 +797,19 @@
       overflow: hidden;
     }
 
-    .item-favicon {
-      width: 16px;
-      height: 16px;
+    .tab-favicon {
+      width: 14px;
+      height: 14px;
       object-fit: contain;
     }
 
-    .item-favicon-fallback {
-      width: 14px;
-      height: 14px;
-      fill: var(--color-text-tertiary);
+    .tab-favicon-fallback {
+      width: 12px;
+      height: 12px;
+      fill: var(--text-faint);
     }
 
-    .item-text-group {
+    .tab-info-group {
       min-width: 0;
       flex: 1;
       display: flex;
@@ -796,413 +817,416 @@
       gap: 1px;
     }
 
-    .item-title {
-      font-size: 12.5px;
+    .tab-title-text {
+      font-size: 12px;
       font-weight: 500;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      letter-spacing: -0.1px;
+      letter-spacing: -0.01em;
     }
 
-    .item-meta {
+    .tab-meta-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--color-text-secondary);
+      gap: 5px;
+      font-size: 10.5px;
+      color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .domain-tag {
-      background-color: var(--color-surface-container);
-      color: var(--color-text-secondary);
-      font-size: 10px;
-      font-weight: 500;
-      padding: 0 5px;
-      border-radius: 4px;
+    .domain-name {
+      color: var(--text-secondary);
     }
 
-    .item-meta span.separator {
-      opacity: 0.4;
+    .tab-meta-dot {
+      color: var(--text-faint);
+      font-size: 9px;
     }
 
-    /* Actions on item */
-    .item-actions {
+    /* Actions on card */
+    .tab-actions-group {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 1px;
       margin-left: 6px;
       flex-shrink: 0;
+      opacity: 0.65;
+      transition: opacity 0.15s ease;
     }
 
-    .btn-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: var(--radius-sm);
+    .tab-card:hover .tab-actions-group {
+      opacity: 1;
+    }
+
+    .action-icon-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-xs);
       border: none;
       background: transparent;
-      color: var(--color-text-tertiary);
+      color: var(--text-muted);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
     }
 
-    .btn-icon:hover {
-      background-color: var(--color-surface-container-high);
-      color: var(--color-text-primary);
+    .action-icon-btn:hover {
+      background-color: var(--bg-surface-hover);
+      color: var(--text-primary);
     }
 
-    .btn-icon.active-star {
-      color: var(--color-accent-amber);
+    .action-icon-btn.starred {
+      color: var(--accent-amber);
     }
 
-    .btn-icon.delete:hover {
-      background-color: var(--color-error-container);
-      color: var(--color-error);
+    .action-icon-btn.delete:hover {
+      background-color: var(--accent-rose-dim);
+      color: var(--accent-rose);
     }
 
-    .btn-icon svg {
-      width: 14px;
-      height: 14px;
+    .action-icon-btn svg {
+      width: 13px;
+      height: 13px;
       fill: currentColor;
     }
 
+    /* Flat List Container */
+    .flat-list-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     /* Empty State */
-    .empty-state {
-      padding: 40px 20px;
+    .empty-state-view {
+      padding: 48px 24px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      color: var(--color-text-secondary);
-      animation: fadeIn 0.25s ease;
+      color: var(--text-muted);
+      animation: fadeIn 0.2s ease;
     }
 
-    .empty-illustration {
-      width: 52px;
-      height: 52px;
+    .empty-icon-wrap {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: var(--color-primary-container);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-default);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
-    .empty-illustration svg {
-      width: 26px;
-      height: 26px;
-      fill: var(--color-primary);
+    .empty-icon-wrap svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--text-secondary);
     }
 
-    .empty-title {
-      font-size: 13.5px;
+    .empty-heading {
+      font-size: 13px;
       font-weight: 600;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
     }
 
-    .empty-subtitle {
+    .empty-detail {
       font-size: 11.5px;
-      color: var(--color-text-secondary);
+      color: var(--text-muted);
       line-height: 1.45;
-      max-width: 240px;
+      max-width: 250px;
     }
 
     /* Settings Page View */
-    .settings-view {
+    .settings-view-deck {
       overflow-y: auto;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       flex: 1;
     }
 
-    .settings-view::-webkit-scrollbar {
+    .settings-view-deck::-webkit-scrollbar {
       width: 5px;
     }
 
-    .settings-view::-webkit-scrollbar-thumb {
-      background-color: var(--color-surface-container-high);
+    .settings-view-deck::-webkit-scrollbar-thumb {
+      background-color: var(--border-default);
       border-radius: var(--radius-full);
     }
 
-    .settings-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .settings-section-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--color-text-tertiary);
-      padding-left: 2px;
-    }
-
-    .settings-card {
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
+    .settings-card-group {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-default);
       border-radius: var(--radius-lg);
-      padding: 6px 12px;
-      display: flex;
-      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
     }
 
-    .settings-row {
+    .settings-group-header {
+      padding: 9px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background-color: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .settings-item-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--color-border-subtle);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .settings-row:last-child {
+    .settings-item-row:last-child {
       border-bottom: none;
     }
 
-    .settings-label-group {
+    .settings-text-block {
       display: flex;
       flex-direction: column;
       gap: 2px;
       padding-right: 12px;
     }
 
-    .settings-label {
-      font-size: 12.5px;
+    .settings-title {
+      font-size: 12px;
       font-weight: 500;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
     }
 
-    .settings-desc {
-      font-size: 11px;
-      color: var(--color-text-tertiary);
-      line-height: 1.3;
+    .settings-subtext {
+      font-size: 10.5px;
+      color: var(--text-muted);
     }
 
-    /* Modern iOS/Material Toggle Switch */
-    .switch {
+    /* Toggle Switch */
+    .toggle-switch {
       position: relative;
       display: inline-block;
-      width: 36px;
-      height: 20px;
+      width: 34px;
+      height: 18px;
       flex-shrink: 0;
     }
 
-    .switch input {
+    .toggle-switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
 
-    .slider {
+    .toggle-track {
       position: absolute;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--color-surface-container-high);
+      inset: 0;
+      background-color: var(--bg-surface-active);
       transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
       border-radius: 20px;
+      border: 1px solid var(--border-default);
     }
 
-    .slider:before {
+    .toggle-track:before {
       position: absolute;
       content: "";
-      height: 14px;
-      width: 14px;
-      left: 3px;
-      bottom: 3px;
+      height: 12px;
+      width: 12px;
+      left: 2px;
+      bottom: 2px;
       background-color: #ffffff;
       transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
       border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
 
-    input:checked + .slider {
-      background-color: var(--color-primary);
+    input:checked + .toggle-track {
+      background-color: var(--accent-primary);
+      border-color: var(--accent-primary);
     }
 
-    input:checked + .slider:before {
+    input:checked + .toggle-track:before {
       transform: translateX(16px);
     }
 
     /* Settings Action Buttons */
-    .btn-settings-action {
+    .btn-grid-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+
+    .btn-action-tile {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 8px 10px;
+      font-size: 11.5px;
       font-weight: 500;
       border-radius: var(--radius-md);
-      border: 1px solid var(--color-border);
-      background-color: var(--color-surface-hover);
-      color: var(--color-text-primary);
+      border: 1px solid var(--border-default);
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-primary);
       cursor: pointer;
-      transition: all 0.15s ease;
-      width: 100%;
+      transition: all 0.12s ease;
     }
 
-    .btn-settings-action:hover {
-      background-color: var(--color-surface-container-high);
-      border-color: var(--color-primary);
+    .btn-action-tile:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-active);
     }
 
-    .btn-settings-action.danger {
-      color: var(--color-error);
-      background-color: var(--color-error-container);
+    .btn-action-tile.danger-tile {
+      color: var(--accent-rose);
+      background-color: var(--accent-rose-dim);
       border-color: transparent;
     }
 
-    .btn-settings-action.danger:hover {
-      filter: brightness(0.95);
+    .btn-action-tile.danger-tile:hover {
+      filter: brightness(1.1);
     }
 
-    .settings-button-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .shortcut-badge {
+    .kbd-shortcut {
       font-family: monospace;
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background-color: var(--color-surface-container);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-secondary);
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: var(--radius-xs);
+      background-color: var(--bg-surface-elevated);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
     }
 
     /* Material Feedback Snackbar with Undo */
-    .snackbar {
+    .snackbar-banner {
       position: fixed;
       bottom: 12px;
-      left: 12px;
-      right: 12px;
-      background-color: #1e293b;
-      color: #f8fafc;
+      left: 14px;
+      right: 14px;
+      background-color: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-active);
       border-radius: var(--radius-md);
-      padding: 9px 14px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: var(--shadow-lg);
-      font-size: 12px;
+      box-shadow: var(--shadow-popover);
+      font-size: 11.5px;
       z-index: 100;
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(10px);
       pointer-events: none;
       transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
 
-    .snackbar.show {
+    .snackbar-banner.show {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
     }
 
-    .snackbar-btn {
+    .snackbar-undo-btn {
       background: none;
       border: none;
-      color: #818cf8;
+      color: var(--accent-primary-hover);
       font-family: inherit;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
       padding: 2px 6px;
       border-radius: 4px;
     }
 
-    .snackbar-btn:hover {
+    .snackbar-undo-btn:hover {
       text-decoration: underline;
     }
 
-    /* Modal Dialog */
-    .modal-backdrop {
+    /* Confirmation Modal Dialog */
+    .modal-scrim {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(4px);
-      z-index: 150;
+      z-index: 200;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
 
-    .modal-backdrop.visible {
+    .modal-scrim.visible {
       display: flex;
     }
 
-    .modal-dialog {
-      background-color: var(--color-surface);
-      border: 1px solid var(--color-border);
+    .modal-box {
+      background-color: var(--bg-surface-elevated);
+      border: 1px solid var(--border-default);
       border-radius: var(--radius-lg);
       padding: 16px;
       width: 100%;
       max-width: 320px;
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-popover);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .modal-title {
-      font-size: 13.5px;
+    .modal-heading {
+      font-size: 13px;
       font-weight: 600;
-      color: var(--color-text-primary);
+      color: var(--text-primary);
     }
 
-    .modal-message {
-      font-size: 12px;
-      color: var(--color-text-secondary);
+    .modal-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
       line-height: 1.4;
     }
 
-    .modal-actions {
+    .modal-btns {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 7px;
+      margin-top: 4px;
     }
 
-    .btn-modal-cancel {
+    .btn-modal-back {
       background: transparent;
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--border-default);
       border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      font-size: 12px;
-      color: var(--color-text-secondary);
+      padding: 5px 11px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
       cursor: pointer;
     }
 
-    .btn-modal-confirm {
-      background: var(--color-error);
+    .btn-modal-purge {
+      background: var(--accent-rose);
       color: #ffffff;
       border: none;
       border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      font-size: 12px;
+      padding: 5px 11px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
     }
 
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -1212,7 +1236,7 @@
     }
 
     @keyframes popIn {
-      from { opacity: 0; transform: scale(0.95); }
+      from { opacity: 0; transform: scale(0.96); }
       to { opacity: 1; transform: scale(1); }
     }
   </style>
@@ -1221,26 +1245,29 @@
   <div class="view-deck">
     <!-- View 1: Main Tabs List -->
     <div id="mainView" class="view-page">
-      <!-- App Header -->
+      <!-- Top App Header -->
       <header class="app-header">
         <div class="app-branding">
-          <img src="icons/icon32.png" alt="Live Tab Stasher" class="app-icon">
+          <div class="app-icon-wrap">
+            <img src="icons/icon32.png" alt="Live Tab Stasher" class="app-icon">
+          </div>
           <div class="app-title-group">
             <span class="app-title">Live Tab Stasher</span>
-            <div class="app-stats-row">
-              <span id="ramSavedLabel" class="ram-saved-badge">0 MB freed</span>
-              <span>•</span>
-              <span id="tabCount" class="badge-count">0</span>
+            <div class="status-pill">
+              <span class="status-dot"></span>
+              <span id="ramSavedLabel">0 MB freed</span>
+              <span class="status-separator">•</span>
+              <span id="tabCount" class="status-count">0 tabs</span>
             </div>
           </div>
         </div>
         <div class="header-actions">
-          <button id="sidePanelBtn" class="header-icon-btn" type="button" title="Open in persistent Side Panel" aria-label="Open in Side Panel">
+          <button id="sidePanelBtn" class="header-btn" type="button" title="Open in persistent Side Panel" aria-label="Open in Side Panel">
             <svg viewBox="0 0 24 24">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 16H5V5h7v14zm7 0h-5V5h5v14z"/>
             </svg>
           </button>
-          <button id="openSettingsBtn" class="header-icon-btn" type="button" title="Settings & Backup" aria-label="Open Settings">
+          <button id="openSettingsBtn" class="header-btn" type="button" title="Settings & Backup" aria-label="Open Settings">
             <svg viewBox="0 0 24 24">
               <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
             </svg>
@@ -1248,43 +1275,41 @@
         </div>
       </header>
 
-      <!-- Primary Action Area -->
-      <section class="action-panel">
-        <div class="button-group-row">
-          <button id="stashBtn" class="btn-primary-stash" type="button" title="Stash active tab and close to free memory">
+      <!-- Unified Hero Action Bar -->
+      <section class="hero-action-panel">
+        <div class="unified-button-group">
+          <button id="stashBtn" class="btn-stash-active" type="button" title="Stash active tab and close to free memory">
             <svg viewBox="0 0 24 24">
-              <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-            <span>Stash Current Tab</span>
+            <span>Stash Active Tab</span>
+          </button>
+          <button id="stashOptionsTrigger" class="btn-stash-options-trigger" type="button" aria-haspopup="true" aria-expanded="false" title="More Stash Options">
+            <svg viewBox="0 0 24 24">
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
           </button>
 
-          <div class="btn-secondary-dropdown">
-            <button id="stashMoreBtn" class="btn-secondary-stash" type="button" aria-haspopup="true" aria-expanded="false" title="More Stash Options">
-              <span>All Tabs</span>
+          <!-- Stash Options Popover -->
+          <div id="stashOptionsPopover" class="popover-menu" role="menu">
+            <button id="stashAllWindowBtn" class="popover-item" type="button" role="menuitem">
               <svg viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z"/>
+                <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
               </svg>
+              <div class="popover-text">
+                <span class="popover-title">Stash Window Tabs</span>
+                <span class="popover-desc">Closes all open tabs in this window</span>
+              </div>
             </button>
-            <div id="stashDropdownMenu" class="dropdown-menu" role="menu">
-              <button id="stashAllWindowBtn" class="dropdown-item" type="button" role="menuitem">
-                <svg viewBox="0 0 24 24">
-                  <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
-                </svg>
-                <div>
-                  <strong>Stash Window Tabs</strong>
-                  <span class="subtext">Saves & closes all open tabs</span>
-                </div>
-              </button>
-              <button id="stashOtherTabsBtn" class="dropdown-item" type="button" role="menuitem">
-                <svg viewBox="0 0 24 24">
-                  <path d="M19 13H5v-2h14v2z"/>
-                </svg>
-                <div>
-                  <strong>Stash Other Tabs</strong>
-                  <span class="subtext">Keep active tab, close rest</span>
-                </div>
-              </button>
-            </div>
+            <button id="stashOtherTabsBtn" class="popover-item" type="button" role="menuitem">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 13H5v-2h14v2z"/>
+              </svg>
+              <div class="popover-text">
+                <span class="popover-title">Stash Other Tabs</span>
+                <span class="popover-desc">Keep current tab, close background</span>
+              </div>
+            </button>
           </div>
         </div>
       </section>
@@ -1297,31 +1322,29 @@
         <span id="alertMessage">Restricted browser page cannot be stashed.</span>
       </aside>
 
-      <!-- Search & Filters Toolbar -->
-      <div id="toolbarContainer" class="toolbar-container">
-        <div class="toolbar-search-row">
-          <div class="search-box">
-            <svg class="search-icon" viewBox="0 0 24 24">
-              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      <!-- Search & Controls Bar -->
+      <div id="searchNavBar" class="search-nav-bar">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input id="searchInput" class="search-input" type="text" placeholder="Search saved tabs... (Press / to focus)" autocomplete="off" spellcheck="false">
+          <button id="clearSearchBtn" class="search-clear-btn" type="button" aria-label="Clear search">
+            <svg viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
             </svg>
-            <input id="searchInput" class="search-input" type="text" placeholder="Search tabs... (Press / to focus)" autocomplete="off" spellcheck="false">
-            <button id="clearSearchBtn" class="btn-clear-search" type="button" aria-label="Clear search">
-              <svg viewBox="0 0 24 24">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-              </svg>
-            </button>
-          </div>
+          </button>
         </div>
 
-        <div class="toolbar-controls-row">
-          <div class="segmented-toggle" role="group" aria-label="View format">
-            <button id="viewGroupedBtn" class="segment-btn active" type="button" title="Group by date">
+        <div class="controls-strip">
+          <div class="segmented-control" role="group" aria-label="View layout">
+            <button id="viewGroupedBtn" class="segment-item active" type="button" title="Group by date folders">
               <svg viewBox="0 0 24 24">
                 <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
               </svg>
               <span>Folders</span>
             </button>
-            <button id="viewFlatBtn" class="segment-btn" type="button" title="Flat chronological list">
+            <button id="viewFlatBtn" class="segment-item" type="button" title="Continuous flat list">
               <svg viewBox="0 0 24 24">
                 <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
               </svg>
@@ -1329,29 +1352,34 @@
             </button>
           </div>
 
-          <div class="sort-select-wrap" title="Sort stashed tabs">
-            <svg viewBox="0 0 24 24">
-              <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
-            </svg>
-            <select id="sortSelect" class="sort-select" aria-label="Sort order">
-              <option value="date-desc">Newest First</option>
-              <option value="date-asc">Oldest First</option>
-              <option value="domain-asc">By Domain</option>
-              <option value="title-asc">By Title (A-Z)</option>
-            </select>
+          <div class="sort-control-wrap">
+            <button id="sortTriggerBtn" class="sort-trigger-btn" type="button" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+              </svg>
+              <span id="sortLabelText">Newest First</span>
+            </button>
+
+            <!-- Sort Popover -->
+            <div id="sortPopover" class="popover-menu" role="menu">
+              <button class="popover-item" type="button" data-sort="date-desc">Newest First</button>
+              <button class="popover-item" type="button" data-sort="date-asc">Oldest First</button>
+              <button class="popover-item" type="button" data-sort="domain-asc">By Domain</button>
+              <button class="popover-item" type="button" data-sort="title-asc">By Title (A-Z)</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Domain Quick Filters -->
-      <nav id="domainChipsContainer" class="domain-chips-strip" aria-label="Domain quick filters">
-        <!-- Rendered dynamically -->
+      <!-- Domain Filter Ribbon -->
+      <nav id="domainRibbon" class="domain-ribbon-container" aria-label="Filter by domain">
+        <!-- Injected dynamically -->
       </nav>
 
-      <!-- Tabs Main List -->
-      <main id="listWrapper" class="list-wrapper">
+      <!-- Scrollable Tabs Area -->
+      <main id="listScrollArea" class="list-scroll-area">
         <div id="stashedListContent">
-          <!-- Rendered dynamically -->
+          <!-- Injected dynamically -->
         </div>
       </main>
     </div>
@@ -1360,131 +1388,123 @@
     <div id="settingsView" class="view-page hidden">
       <header class="app-header">
         <div class="app-branding">
-          <button id="closeSettingsBtn" class="header-icon-btn" type="button" title="Back to tabs" aria-label="Back">
+          <button id="closeSettingsBtn" class="header-btn" type="button" title="Back to tabs" aria-label="Back">
             <svg viewBox="0 0 24 24">
               <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
             </svg>
           </button>
           <span class="app-title">Settings & Backup</span>
         </div>
-        <span class="folder-pill">v1.2.0</span>
+        <span class="section-badge">v1.2.0</span>
       </header>
 
-      <div class="settings-view">
-        <!-- Preferences Section -->
-        <section class="settings-section">
-          <span class="settings-section-title">Stashing Preferences</span>
-          <div class="settings-card">
-            <div class="settings-row">
-              <div class="settings-label-group">
-                <span class="settings-label">Group by Date Folders</span>
-                <span class="settings-desc">Organize tabs by Today, Yesterday, and Past Weeks</span>
-              </div>
-              <label class="switch">
-                <input id="settingGroupByDate" type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+      <div class="settings-view-deck">
+        <!-- Group 1: Preferences -->
+        <section class="settings-card-group">
+          <div class="settings-group-header">Organization & Memory Rules</div>
+          
+          <div class="settings-item-row">
+            <div class="settings-text-block">
+              <span class="settings-title">Group by Date Folders</span>
+              <span class="settings-subtext">Categorize into Today, Yesterday, and Past Weeks</span>
             </div>
+            <label class="toggle-switch">
+              <input id="settingGroupByDate" type="checkbox" checked>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
 
-            <div class="settings-row">
-              <div class="settings-label-group">
-                <span class="settings-label">Ignore Pinned Tabs</span>
-                <span class="settings-desc">Keep pinned tabs open when using Stash All Tabs</span>
-              </div>
-              <label class="switch">
-                <input id="settingIgnorePinned" type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+          <div class="settings-item-row">
+            <div class="settings-text-block">
+              <span class="settings-title">Protect Pinned Browser Tabs</span>
+              <span class="settings-subtext">Prevent Stash All from closing pinned tabs</span>
             </div>
+            <label class="toggle-switch">
+              <input id="settingIgnorePinned" type="checkbox" checked>
+              <span class="toggle-track"></span>
+            </label>
+          </div>
 
-            <div class="settings-row">
-              <div class="settings-label-group">
-                <span class="settings-label">Close Tabs to Free RAM</span>
-                <span class="settings-desc">Immediately terminate process memory upon stashing</span>
-              </div>
-              <label class="switch">
-                <input id="settingCloseOnStash" type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+          <div class="settings-item-row">
+            <div class="settings-text-block">
+              <span class="settings-title">Close Tabs Immediately</span>
+              <span class="settings-subtext">Terminate process to free RAM instantly</span>
             </div>
+            <label class="toggle-switch">
+              <input id="settingCloseOnStash" type="checkbox" checked>
+              <span class="toggle-track"></span>
+            </label>
           </div>
         </section>
 
-        <!-- Data Management Section -->
-        <section class="settings-section">
-          <span class="settings-section-title">Data Backup & Restore</span>
-          <div class="settings-card">
-            <div class="settings-button-grid">
-              <button id="exportJsonBtn" class="btn-settings-action" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
-                <span>Export JSON</span>
-              </button>
-              <button id="exportMarkdownBtn" class="btn-settings-action" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                </svg>
-                <span>Export Markdown</span>
-              </button>
-            </div>
-
-            <div class="settings-button-grid">
-              <button id="importJsonBtn" class="btn-settings-action" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
-                </svg>
-                <span>Import Backup</span>
-              </button>
-              <button id="clearAllDataBtn" class="btn-settings-action danger" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-                <span>Clear Stash</span>
-              </button>
-            </div>
-            <input id="importFileInput" type="file" accept=".json" style="display: none;">
+        <!-- Group 2: Data Portability -->
+        <section class="settings-card-group">
+          <div class="settings-group-header">Data Backup & Sync</div>
+          <div class="btn-grid-actions">
+            <button id="exportJsonBtn" class="btn-action-tile" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              <span>Export JSON</span>
+            </button>
+            <button id="exportMarkdownBtn" class="btn-action-tile" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+              </svg>
+              <span>Markdown</span>
+            </button>
+            <button id="importJsonBtn" class="btn-action-tile" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+              </svg>
+              <span>Import Backup</span>
+            </button>
+            <button id="clearAllDataBtn" class="btn-action-tile danger-tile" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg>
+              <span>Clear Stash</span>
+            </button>
           </div>
+          <input id="importFileInput" type="file" accept=".json" style="display: none;">
         </section>
 
-        <!-- Keyboard Shortcuts -->
-        <section class="settings-section">
-          <span class="settings-section-title">Productivity Shortcuts</span>
-          <div class="settings-card">
-            <div class="settings-row">
-              <span class="settings-label">Stash Active Tab</span>
-              <span class="shortcut-badge">Alt + Shift + S</span>
-            </div>
-            <div class="settings-row">
-              <span class="settings-label">Stash All Window Tabs</span>
-              <span class="shortcut-badge">Alt + Shift + A</span>
-            </div>
-            <div class="settings-row">
-              <span class="settings-label">Search Tabs in Popup</span>
-              <span class="shortcut-badge">/</span>
-            </div>
+        <!-- Group 3: Keyboard Shortcuts -->
+        <section class="settings-card-group">
+          <div class="settings-group-header">Productivity Shortcuts</div>
+          <div class="settings-item-row">
+            <span class="settings-title">Stash Active Tab</span>
+            <span class="kbd-shortcut">Alt + Shift + S</span>
+          </div>
+          <div class="settings-item-row">
+            <span class="settings-title">Stash Window Tabs</span>
+            <span class="kbd-shortcut">Alt + Shift + A</span>
+          </div>
+          <div class="settings-item-row">
+            <span class="settings-title">Quick Search</span>
+            <span class="kbd-shortcut">/</span>
           </div>
         </section>
       </div>
     </div>
   </div>
 
-  <!-- Clear All Confirmation Modal -->
-  <div id="clearConfirmModal" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h3 class="modal-title">Clear All Stashed Tabs?</h3>
-      <p class="modal-message">This will permanently remove all stashed tabs from storage. Consider exporting a JSON backup first.</p>
-      <div class="modal-actions">
-        <button id="cancelClearBtn" class="btn-modal-cancel" type="button">Cancel</button>
-        <button id="confirmClearBtn" class="btn-modal-confirm" type="button">Delete All</button>
+  <!-- Clear All Scrim Modal -->
+  <div id="clearConfirmModal" class="modal-scrim">
+    <div class="modal-box">
+      <h3 class="modal-heading">Clear All Stashed Tabs?</h3>
+      <p class="modal-desc">This action removes all saved tabs permanently from storage. You can undo this briefly via the snackbar.</p>
+      <div class="modal-btns">
+        <button id="cancelClearBtn" class="btn-modal-back" type="button">Cancel</button>
+        <button id="confirmClearBtn" class="btn-modal-purge" type="button">Purge All</button>
       </div>
     </div>
   </div>
 
   <!-- Material Feedback Snackbar with Undo -->
-  <div id="snackbar" class="snackbar" role="status">
+  <div id="snackbar" class="snackbar-banner" role="status">
     <span id="snackbarText">Tab stashed</span>
-    <button id="snackbarUndoBtn" class="snackbar-btn" type="button">Undo</button>
+    <button id="snackbarUndoBtn" class="snackbar-undo-btn" type="button">Undo</button>
   </div>
 
   <script src="popup.js"></script>
