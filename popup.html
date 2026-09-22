@@ -6,57 +6,73 @@
   <title>Live Tab Stasher</title>
   <style>
     :root {
-      /* Material 3 Light Color System */
-      --md-sys-color-primary: #0b57d0;
-      --md-sys-color-on-primary: #ffffff;
-      --md-sys-color-primary-container: #d3e3fd;
-      --md-sys-color-on-primary-container: #041e49;
-      --md-sys-color-surface: #ffffff;
-      --md-sys-color-surface-dim: #f8f9fa;
-      --md-sys-color-surface-container: #f0f4f9;
-      --md-sys-color-surface-container-high: #e9eef6;
-      --md-sys-color-on-surface: #1f1f1f;
-      --md-sys-color-on-surface-variant: #444746;
-      --md-sys-color-outline: #747775;
-      --md-sys-color-outline-variant: #e0e2ec;
-      --md-sys-color-error: #ba1a1a;
-      --md-sys-color-error-container: #ffdad6;
-      --md-sys-color-on-error-container: #410002;
-      --md-sys-color-inverse-surface: #303030;
-      --md-sys-color-inverse-on-surface: #f1f1f1;
-      --md-sys-color-inverse-primary: #a8c7fa;
+      /* Base Theme Tokens - Light Mode */
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-hover: #f1f5f9;
+      --color-surface-container: #edf2f7;
+      --color-surface-container-high: #e2e8f0;
+      --color-surface-glass: rgba(255, 255, 255, 0.85);
+      --color-border: #e2e8f0;
+      --color-border-subtle: #f1f5f9;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-tertiary: #94a3b8;
+      
+      --color-primary: #4f46e5;
+      --color-primary-hover: #4338ca;
+      --color-primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      --color-primary-container: #e0e7ff;
+      --color-on-primary-container: #3730a3;
+      
+      --color-accent-emerald: #10b981;
+      --color-accent-amber: #f59e0b;
+      --color-error: #ef4444;
+      --color-error-container: #fee2e2;
+      --color-on-error-container: #991b1b;
 
-      /* Material 3 Shape & Elevations */
-      --md-shape-full: 9999px;
-      --md-shape-large: 16px;
-      --md-shape-medium: 12px;
-      --md-shape-small: 8px;
-      --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
-      --md-elevation-2: 0 2px 6px 2px rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
-      --md-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.24);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+      
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        /* Material 3 Dark Color System */
-        --md-sys-color-primary: #a8c7fa;
-        --md-sys-color-on-primary: #042e6f;
-        --md-sys-color-primary-container: #0842a0;
-        --md-sys-color-on-primary-container: #d3e3fd;
-        --md-sys-color-surface: #1a1c1e;
-        --md-sys-color-surface-dim: #131416;
-        --md-sys-color-surface-container: #212428;
-        --md-sys-color-surface-container-high: #2c2f34;
-        --md-sys-color-on-surface: #e2e2e6;
-        --md-sys-color-on-surface-variant: #c4c7c5;
-        --md-sys-color-outline: #8e918f;
-        --md-sys-color-outline-variant: #444746;
-        --md-sys-color-error: #ffb4ab;
-        --md-sys-color-error-container: #93000a;
-        --md-sys-color-on-error-container: #ffdad6;
-        --md-sys-color-inverse-surface: #e2e2e6;
-        --md-sys-color-inverse-on-surface: #2f3033;
-        --md-sys-color-inverse-primary: #0b57d0;
+        /* Base Theme Tokens - Modern Dark Obsidian */
+        --color-bg: #090a10;
+        --color-surface: #111420;
+        --color-surface-hover: #181d2e;
+        --color-surface-container: #161928;
+        --color-surface-container-high: #21263c;
+        --color-surface-glass: rgba(17, 20, 32, 0.88);
+        --color-border: rgba(255, 255, 255, 0.08);
+        --color-border-subtle: rgba(255, 255, 255, 0.04);
+        --color-text-primary: #f8fafc;
+        --color-text-secondary: #94a3b8;
+        --color-text-tertiary: #64748b;
+        
+        --color-primary: #6366f1;
+        --color-primary-hover: #4f46e5;
+        --color-primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        --color-primary-container: rgba(99, 102, 241, 0.16);
+        --color-on-primary-container: #c7d2fe;
+        
+        --color-accent-emerald: #34d399;
+        --color-accent-amber: #fbbf24;
+        --color-error: #f87171;
+        --color-error-container: rgba(239, 68, 68, 0.16);
+        --color-on-error-container: #fca5a5;
+
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.45);
+        --shadow-lg: 0 12px 24px 0 rgba(0, 0, 0, 0.55);
       }
     }
 
@@ -67,30 +83,58 @@
     }
 
     body {
-      width: 320px;
-      min-height: 240px;
-      max-height: 560px;
-      font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: var(--md-sys-color-surface);
-      color: var(--md-sys-color-on-surface);
+      width: 380px;
+      min-height: 280px;
+      max-height: 590px;
+      font-family: var(--font-stack);
+      background-color: var(--color-bg);
+      color: var(--color-text-primary);
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      overflow-y: hidden;
       user-select: none;
       position: relative;
     }
 
-    /* App Header / Top Bar */
+    /* Views Layout Container */
+    .view-deck {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .view-page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      flex: 1;
+      overflow: hidden;
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
+    }
+
+    .view-page.hidden {
+      display: none;
+    }
+
+    /* Header Bar */
     .app-header {
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--md-sys-color-outline-variant);
-      background-color: var(--md-sys-color-surface);
+      border-bottom: 1px solid var(--color-border);
+      background-color: var(--color-surface-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
     }
 
     .app-branding {
@@ -100,10 +144,11 @@
     }
 
     .app-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
       object-fit: contain;
+      box-shadow: var(--shadow-sm);
     }
 
     .app-title-group {
@@ -114,94 +159,258 @@
     .app-title {
       font-size: 13.5px;
       font-weight: 600;
-      letter-spacing: 0.1px;
-      color: var(--md-sys-color-on-surface);
+      letter-spacing: -0.2px;
+      color: var(--color-text-primary);
       line-height: 1.2;
     }
 
-    .app-stats {
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--md-sys-color-on-surface-variant);
-    }
-
-    .header-chips {
+    .app-stats-row {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 11px;
+      color: var(--color-text-secondary);
     }
 
-    .badge-chip {
-      background-color: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
+    .ram-saved-badge {
+      color: var(--color-accent-emerald);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .header-icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .header-icon-btn:hover {
+      background-color: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      border-color: var(--color-border);
+    }
+
+    .header-icon-btn.active {
+      background-color: var(--color-primary-container);
+      color: var(--color-on-primary-container);
+      border-color: transparent;
+    }
+
+    .header-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .badge-count {
+      background-color: var(--color-primary-container);
+      color: var(--color-on-primary-container);
       font-size: 11px;
       font-weight: 600;
-      padding: 2px 8px;
-      border-radius: var(--md-shape-full);
-      letter-spacing: 0.2px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
       display: inline-flex;
       align-items: center;
     }
 
-    /* Actions Section */
+    /* Stash Action Panel */
     .action-panel {
       padding: 12px 16px 8px 16px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      background-color: var(--md-sys-color-surface);
+      background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border-subtle);
     }
 
-    /* Material 3 Filled Primary Button */
-    .btn-primary {
-      width: 100%;
-      height: 42px;
+    .button-group-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-primary-stash {
+      flex: 1;
+      height: 40px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       border: none;
-      border-radius: var(--md-shape-full);
-      background-color: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
+      border-radius: var(--radius-md);
+      background: var(--color-primary-gradient);
+      color: #ffffff;
       font-family: inherit;
       font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.1px;
+      font-weight: 600;
+      letter-spacing: -0.1px;
       cursor: pointer;
-      box-shadow: var(--md-elevation-1);
-      transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1),
-                  box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1),
-                  transform 0.1s ease;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
     }
 
-    .btn-primary:hover {
-      box-shadow: var(--md-elevation-2);
-      filter: brightness(1.06);
+    .btn-primary-stash:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
     }
 
-    .btn-primary:active {
-      transform: scale(0.985);
+    .btn-primary-stash:active {
+      transform: translateY(0);
     }
 
-    .btn-primary svg {
-      width: 18px;
-      height: 18px;
+    .btn-primary-stash svg {
+      width: 17px;
+      height: 17px;
       fill: currentColor;
     }
 
-    /* Search & Filter Toolbar */
-    .toolbar-container {
-      display: none;
-      padding: 0 16px 8px 16px;
-      gap: 8px;
-      align-items: center;
+    .btn-secondary-dropdown {
+      position: relative;
     }
 
-    .toolbar-container.visible {
+    .btn-secondary-stash {
+      height: 40px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background-color: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-secondary-stash:hover {
+      background-color: var(--color-surface-container-high);
+      border-color: var(--color-primary);
+    }
+
+    .btn-secondary-stash svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 5px;
+      display: none;
+      flex-direction: column;
+      min-width: 190px;
+      z-index: 50;
+      animation: popIn 0.15s cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .dropdown-menu.visible {
       display: flex;
+    }
+
+    .dropdown-item {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      text-align: left;
+      width: 100%;
+      transition: background-color 0.15s;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--color-surface-hover);
+      color: var(--color-primary);
+    }
+
+    .dropdown-item svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    .dropdown-item .subtext {
+      font-size: 10.5px;
+      color: var(--color-text-tertiary);
+      display: block;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      display: none;
+      margin: 8px 16px 0 16px;
+      padding: 8px 12px;
+      background-color: var(--color-error-container);
+      color: var(--color-on-error-container);
+      border-radius: var(--radius-md);
+      font-size: 11.5px;
+      line-height: 1.4;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .alert-banner.visible {
+      display: flex;
+    }
+
+    .alert-banner svg {
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    /* Filter Toolbar */
+    .toolbar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 16px 8px 16px;
+      background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .toolbar-search-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .search-box {
@@ -214,20 +423,21 @@
     .search-input {
       width: 100%;
       height: 32px;
-      padding: 0 28px 0 30px;
-      background-color: var(--md-sys-color-surface-container);
-      border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: var(--md-shape-full);
+      padding: 0 28px 0 32px;
+      background-color: var(--color-surface-container);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
       font-family: inherit;
       font-size: 12px;
-      color: var(--md-sys-color-on-surface);
+      color: var(--color-text-primary);
       outline: none;
-      transition: border-color 0.2s, background-color 0.2s;
+      transition: all 0.2s ease;
     }
 
     .search-input:focus {
-      border-color: var(--md-sys-color-primary);
-      background-color: var(--md-sys-color-surface);
+      border-color: var(--color-primary);
+      background-color: var(--color-surface);
+      box-shadow: 0 0 0 3px var(--color-primary-container);
     }
 
     .search-box svg.search-icon {
@@ -235,7 +445,7 @@
       left: 10px;
       width: 14px;
       height: 14px;
-      fill: var(--md-sys-color-on-surface-variant);
+      fill: var(--color-text-tertiary);
       pointer-events: none;
     }
 
@@ -248,7 +458,7 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      color: var(--md-sys-color-on-surface-variant);
+      color: var(--color-text-tertiary);
       padding: 0;
       align-items: center;
       justify-content: center;
@@ -264,99 +474,285 @@
       fill: currentColor;
     }
 
-    .batch-actions {
+    /* Controls Strip: Group Toggle + Sort Mode */
+    .toolbar-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .segmented-toggle {
+      display: inline-flex;
+      background-color: var(--color-surface-container);
+      border-radius: var(--radius-full);
+      padding: 2px;
+      border: 1px solid var(--color-border);
+    }
+
+    .segment-btn {
+      border: none;
+      background: transparent;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .segment-btn.active {
+      background-color: var(--color-surface);
+      color: var(--color-primary);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .segment-btn svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    .sort-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background-color: var(--color-surface-container);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+    }
+
+    .sort-select-wrap svg {
+      width: 12px;
+      height: 12px;
+      fill: var(--color-text-secondary);
+    }
+
+    .sort-select {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Domain Filter Chips */
+    .domain-chips-strip {
+      display: none;
+      padding: 0 16px 8px 16px;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .domain-chips-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .domain-chips-strip.visible {
+      display: flex;
+    }
+
+    .domain-chip {
+      background-color: var(--color-surface-container);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .domain-chip:hover {
+      background-color: var(--color-surface-container-high);
+      color: var(--color-text-primary);
+    }
+
+    .domain-chip.active {
+      background-color: var(--color-primary-container);
+      color: var(--color-on-primary-container);
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    /* Stashed List Container */
+    .list-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .list-wrapper::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .list-wrapper::-webkit-scrollbar-thumb {
+      background-color: var(--color-surface-container-high);
+      border-radius: var(--radius-full);
+    }
+
+    /* Accordion Date Folders */
+    .folder-group {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background-color: var(--color-surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .folder-group.pinned-group {
+      border-color: rgba(99, 102, 241, 0.35);
+      background-color: rgba(99, 102, 241, 0.03);
+    }
+
+    .folder-header {
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      background-color: var(--color-surface);
+      user-select: none;
+      transition: background-color 0.15s;
+    }
+
+    .folder-header:hover {
+      background-color: var(--color-surface-hover);
+    }
+
+    .folder-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .folder-chevron {
+      width: 14px;
+      height: 14px;
+      fill: var(--color-text-tertiary);
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .folder-group.collapsed .folder-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .folder-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .folder-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      letter-spacing: -0.1px;
+    }
+
+    .folder-pill {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background-color: var(--color-surface-container);
+      color: var(--color-text-secondary);
+    }
+
+    .folder-header-right {
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    .btn-text-action {
+    .btn-folder-action {
       background: transparent;
       border: none;
+      color: var(--color-primary);
       font-size: 11px;
-      font-weight: 500;
-      color: var(--md-sys-color-primary);
+      font-weight: 600;
+      padding: 3px 7px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      padding: 6px 8px;
-      border-radius: var(--md-shape-small);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       transition: background-color 0.15s;
     }
 
-    .btn-text-action:hover {
-      background-color: var(--md-sys-color-surface-container-high);
+    .btn-folder-action:hover {
+      background-color: var(--color-primary-container);
     }
 
-    /* Notification / Error Banner */
-    .alert-banner {
-      display: none;
-      margin: 0 16px 8px 16px;
-      padding: 8px 12px;
-      background-color: var(--md-sys-color-error-container);
-      color: var(--md-sys-color-on-error-container);
-      border-radius: var(--md-shape-small);
-      font-size: 11.5px;
-      line-height: 1.4;
-      align-items: center;
-      gap: 8px;
-      animation: slideIn 0.2s cubic-bezier(0, 0, 0.2, 1);
+    .folder-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.2s cubic-bezier(0.2, 0, 0, 1);
+      border-top: 1px solid var(--color-border-subtle);
     }
 
-    .alert-banner.visible {
+    .folder-group.collapsed .folder-body {
+      grid-template-rows: 0fr;
+      border-top-color: transparent;
+    }
+
+    .folder-body-inner {
+      overflow: hidden;
       display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 6px 8px 8px 8px;
     }
 
-    .alert-banner svg {
-      flex-shrink: 0;
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
-    }
-
-    /* Stashed Tabs List Container */
-    .list-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 12px 12px 12px;
-      max-height: 380px;
-    }
-
-    .list-wrapper::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .list-wrapper::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .list-wrapper::-webkit-scrollbar-thumb {
-      background-color: var(--md-sys-color-outline-variant);
-      border-radius: var(--md-shape-full);
-    }
-
-    .stashed-list {
-      list-style: none;
+    /* Flat list container */
+    .stashed-list-flat {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      list-style: none;
     }
 
-    /* Material 3 Card Item */
+    /* Card Item */
     .stashed-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
-      border-radius: var(--md-shape-medium);
-      background-color: var(--md-sys-color-surface);
-      border: 1px solid var(--md-sys-color-outline-variant);
-      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: all 0.15s ease;
       cursor: pointer;
       position: relative;
     }
 
     .stashed-item:hover {
-      background-color: var(--md-sys-color-surface-container);
-      border-color: var(--md-sys-color-outline);
+      background-color: var(--color-surface-hover);
+      border-color: var(--color-primary-container);
+      transform: translateX(1px);
+    }
+
+    .stashed-item.is-pinned {
+      border-left: 3px solid var(--color-accent-amber);
     }
 
     .item-main {
@@ -368,10 +764,11 @@
     }
 
     .favicon-wrap {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background-color: var(--md-sys-color-surface-container-high);
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background-color: var(--color-surface-container);
+      border: 1px solid var(--color-border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -388,7 +785,7 @@
     .item-favicon-fallback {
       width: 14px;
       height: 14px;
-      fill: var(--md-sys-color-on-surface-variant);
+      fill: var(--color-text-tertiary);
     }
 
     .item-text-group {
@@ -402,10 +799,11 @@
     .item-title {
       font-size: 12.5px;
       font-weight: 500;
-      color: var(--md-sys-color-on-surface);
+      color: var(--color-text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      letter-spacing: -0.1px;
     }
 
     .item-meta {
@@ -413,10 +811,19 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      color: var(--md-sys-color-on-surface-variant);
+      color: var(--color-text-secondary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .domain-tag {
+      background-color: var(--color-surface-container);
+      color: var(--color-text-secondary);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 0 5px;
+      border-radius: 4px;
     }
 
     .item-meta span.separator {
@@ -433,53 +840,57 @@
     }
 
     .btn-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--md-shape-full);
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
       border: none;
       background: transparent;
-      color: var(--md-sys-color-on-surface-variant);
+      color: var(--color-text-tertiary);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background-color 0.15s, color 0.15s;
+      transition: all 0.15s ease;
     }
 
     .btn-icon:hover {
-      background-color: var(--md-sys-color-surface-container-high);
-      color: var(--md-sys-color-on-surface);
+      background-color: var(--color-surface-container-high);
+      color: var(--color-text-primary);
+    }
+
+    .btn-icon.active-star {
+      color: var(--color-accent-amber);
     }
 
     .btn-icon.delete:hover {
-      background-color: rgba(186, 26, 26, 0.12);
-      color: var(--md-sys-color-error);
+      background-color: var(--color-error-container);
+      color: var(--color-error);
     }
 
     .btn-icon svg {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       fill: currentColor;
     }
 
     /* Empty State */
     .empty-state {
-      padding: 36px 16px 28px 16px;
+      padding: 40px 20px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      color: var(--md-sys-color-on-surface-variant);
+      gap: 10px;
+      color: var(--color-text-secondary);
       animation: fadeIn 0.25s ease;
     }
 
     .empty-illustration {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
-      background-color: var(--md-sys-color-surface-container);
+      background: var(--color-primary-container);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -487,45 +898,216 @@
     }
 
     .empty-illustration svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--md-sys-color-outline);
+      width: 26px;
+      height: 26px;
+      fill: var(--color-primary);
     }
 
     .empty-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--md-sys-color-on-surface);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-text-primary);
     }
 
     .empty-subtitle {
       font-size: 11.5px;
-      color: var(--md-sys-color-on-surface-variant);
-      line-height: 1.4;
-      max-width: 220px;
+      color: var(--color-text-secondary);
+      line-height: 1.45;
+      max-width: 240px;
     }
 
-    /* Material Snackbar */
+    /* Settings Page View */
+    .settings-view {
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .settings-view::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .settings-view::-webkit-scrollbar-thumb {
+      background-color: var(--color-surface-container-high);
+      border-radius: var(--radius-full);
+    }
+
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .settings-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-tertiary);
+      padding-left: 2px;
+    }
+
+    .settings-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-label-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-right: 12px;
+    }
+
+    .settings-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
+    .settings-desc {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      line-height: 1.3;
+    }
+
+    /* Modern iOS/Material Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--color-surface-container-high);
+      transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    input:checked + .slider {
+      background-color: var(--color-primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
+    /* Settings Action Buttons */
+    .btn-settings-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background-color: var(--color-surface-hover);
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+
+    .btn-settings-action:hover {
+      background-color: var(--color-surface-container-high);
+      border-color: var(--color-primary);
+    }
+
+    .btn-settings-action.danger {
+      color: var(--color-error);
+      background-color: var(--color-error-container);
+      border-color: transparent;
+    }
+
+    .btn-settings-action.danger:hover {
+      filter: brightness(0.95);
+    }
+
+    .settings-button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .shortcut-badge {
+      font-family: monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: var(--color-surface-container);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    /* Material Feedback Snackbar with Undo */
     .snackbar {
       position: fixed;
       bottom: 12px;
       left: 12px;
       right: 12px;
-      background-color: var(--md-sys-color-inverse-surface);
-      color: var(--md-sys-color-inverse-on-surface);
-      border-radius: var(--md-shape-small);
-      padding: 8px 14px;
+      background-color: #1e293b;
+      color: #f8fafc;
+      border-radius: var(--radius-md);
+      padding: 9px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: var(--md-elevation-3);
+      box-shadow: var(--shadow-lg);
       font-size: 12px;
       z-index: 100;
       opacity: 0;
       transform: translateY(12px);
       pointer-events: none;
-      transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1),
-                  transform 0.2s cubic-bezier(0, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
     }
 
     .snackbar.show {
@@ -537,7 +1119,7 @@
     .snackbar-btn {
       background: none;
       border: none;
-      color: var(--md-sys-color-inverse-primary);
+      color: #818cf8;
       font-family: inherit;
       font-size: 12px;
       font-weight: 600;
@@ -550,6 +1132,75 @@
       text-decoration: underline;
     }
 
+    /* Modal Dialog */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 150;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .modal-message {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .btn-modal-confirm {
+      background: var(--color-error);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     @keyframes slideIn {
       from { opacity: 0; transform: translateY(-6px); }
       to { opacity: 1; transform: translateY(0); }
@@ -559,65 +1210,276 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
-  <!-- Material Top App Bar -->
-  <header class="app-header">
-    <div class="app-branding">
-      <img src="icons/icon32.png" alt="Live Tab Stasher" class="app-icon">
-      <div class="app-title-group">
-        <span class="app-title">Live Tab Stasher</span>
-        <span id="ramSavedLabel" class="app-stats">0 MB RAM freed</span>
-      </div>
-    </div>
-    <div class="header-chips">
-      <span id="tabCount" class="badge-chip" aria-label="Total stashed tabs">0</span>
-    </div>
-  </header>
+  <div class="view-deck">
+    <!-- View 1: Main Tabs List -->
+    <div id="mainView" class="view-page">
+      <!-- App Header -->
+      <header class="app-header">
+        <div class="app-branding">
+          <img src="icons/icon32.png" alt="Live Tab Stasher" class="app-icon">
+          <div class="app-title-group">
+            <span class="app-title">Live Tab Stasher</span>
+            <div class="app-stats-row">
+              <span id="ramSavedLabel" class="ram-saved-badge">0 MB freed</span>
+              <span>•</span>
+              <span id="tabCount" class="badge-count">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="sidePanelBtn" class="header-icon-btn" type="button" title="Open in persistent Side Panel" aria-label="Open in Side Panel">
+            <svg viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 16H5V5h7v14zm7 0h-5V5h5v14z"/>
+            </svg>
+          </button>
+          <button id="openSettingsBtn" class="header-icon-btn" type="button" title="Settings & Backup" aria-label="Open Settings">
+            <svg viewBox="0 0 24 24">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+          </button>
+        </div>
+      </header>
 
-  <!-- Primary Action Area -->
-  <section class="action-panel">
-    <button id="stashBtn" class="btn-primary" type="button" title="Stash active tab and close to free memory">
-      <svg viewBox="0 0 24 24">
-        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-      </svg>
-      <span>Stash Current Tab</span>
-    </button>
-  </section>
+      <!-- Primary Action Area -->
+      <section class="action-panel">
+        <div class="button-group-row">
+          <button id="stashBtn" class="btn-primary-stash" type="button" title="Stash active tab and close to free memory">
+            <svg viewBox="0 0 24 24">
+              <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+            </svg>
+            <span>Stash Current Tab</span>
+          </button>
 
-  <!-- Alert Banner for Restricted Pages -->
-  <aside id="alertBanner" class="alert-banner" role="alert" aria-live="polite">
-    <svg viewBox="0 0 24 24">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-    </svg>
-    <span id="alertMessage">Restricted browser page cannot be stashed.</span>
-  </aside>
+          <div class="btn-secondary-dropdown">
+            <button id="stashMoreBtn" class="btn-secondary-stash" type="button" aria-haspopup="true" aria-expanded="false" title="More Stash Options">
+              <span>All Tabs</span>
+              <svg viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </button>
+            <div id="stashDropdownMenu" class="dropdown-menu" role="menu">
+              <button id="stashAllWindowBtn" class="dropdown-item" type="button" role="menuitem">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
+                </svg>
+                <div>
+                  <strong>Stash Window Tabs</strong>
+                  <span class="subtext">Saves & closes all open tabs</span>
+                </div>
+              </button>
+              <button id="stashOtherTabsBtn" class="dropdown-item" type="button" role="menuitem">
+                <svg viewBox="0 0 24 24">
+                  <path d="M19 13H5v-2h14v2z"/>
+                </svg>
+                <div>
+                  <strong>Stash Other Tabs</strong>
+                  <span class="subtext">Keep active tab, close rest</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- Search & Bulk Action Toolbar -->
-  <div id="toolbarContainer" class="toolbar-container">
-    <div class="search-box">
-      <svg class="search-icon" viewBox="0 0 24 24">
-        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-      </svg>
-      <input id="searchInput" class="search-input" type="text" placeholder="Search stashed tabs..." autocomplete="off" spellcheck="false">
-      <button id="clearSearchBtn" class="btn-clear-search" type="button" aria-label="Clear search">
+      <!-- Alert Banner -->
+      <aside id="alertBanner" class="alert-banner" role="alert" aria-live="polite">
         <svg viewBox="0 0 24 24">
-          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
         </svg>
-      </button>
+        <span id="alertMessage">Restricted browser page cannot be stashed.</span>
+      </aside>
+
+      <!-- Search & Filters Toolbar -->
+      <div id="toolbarContainer" class="toolbar-container">
+        <div class="toolbar-search-row">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input id="searchInput" class="search-input" type="text" placeholder="Search tabs... (Press / to focus)" autocomplete="off" spellcheck="false">
+            <button id="clearSearchBtn" class="btn-clear-search" type="button" aria-label="Clear search">
+              <svg viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-controls-row">
+          <div class="segmented-toggle" role="group" aria-label="View format">
+            <button id="viewGroupedBtn" class="segment-btn active" type="button" title="Group by date">
+              <svg viewBox="0 0 24 24">
+                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+              </svg>
+              <span>Folders</span>
+            </button>
+            <button id="viewFlatBtn" class="segment-btn" type="button" title="Flat chronological list">
+              <svg viewBox="0 0 24 24">
+                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+              </svg>
+              <span>Flat</span>
+            </button>
+          </div>
+
+          <div class="sort-select-wrap" title="Sort stashed tabs">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
+            </svg>
+            <select id="sortSelect" class="sort-select" aria-label="Sort order">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="domain-asc">By Domain</option>
+              <option value="title-asc">By Title (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Quick Filters -->
+      <nav id="domainChipsContainer" class="domain-chips-strip" aria-label="Domain quick filters">
+        <!-- Rendered dynamically -->
+      </nav>
+
+      <!-- Tabs Main List -->
+      <main id="listWrapper" class="list-wrapper">
+        <div id="stashedListContent">
+          <!-- Rendered dynamically -->
+        </div>
+      </main>
     </div>
-    <div class="batch-actions">
-      <button id="restoreAllBtn" class="btn-text-action" type="button" title="Restore all stashed tabs">Restore All</button>
+
+    <!-- View 2: Settings & Backup View -->
+    <div id="settingsView" class="view-page hidden">
+      <header class="app-header">
+        <div class="app-branding">
+          <button id="closeSettingsBtn" class="header-icon-btn" type="button" title="Back to tabs" aria-label="Back">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+          </button>
+          <span class="app-title">Settings & Backup</span>
+        </div>
+        <span class="folder-pill">v1.2.0</span>
+      </header>
+
+      <div class="settings-view">
+        <!-- Preferences Section -->
+        <section class="settings-section">
+          <span class="settings-section-title">Stashing Preferences</span>
+          <div class="settings-card">
+            <div class="settings-row">
+              <div class="settings-label-group">
+                <span class="settings-label">Group by Date Folders</span>
+                <span class="settings-desc">Organize tabs by Today, Yesterday, and Past Weeks</span>
+              </div>
+              <label class="switch">
+                <input id="settingGroupByDate" type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-label-group">
+                <span class="settings-label">Ignore Pinned Tabs</span>
+                <span class="settings-desc">Keep pinned tabs open when using Stash All Tabs</span>
+              </div>
+              <label class="switch">
+                <input id="settingIgnorePinned" type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-label-group">
+                <span class="settings-label">Close Tabs to Free RAM</span>
+                <span class="settings-desc">Immediately terminate process memory upon stashing</span>
+              </div>
+              <label class="switch">
+                <input id="settingCloseOnStash" type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Management Section -->
+        <section class="settings-section">
+          <span class="settings-section-title">Data Backup & Restore</span>
+          <div class="settings-card">
+            <div class="settings-button-grid">
+              <button id="exportJsonBtn" class="btn-settings-action" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                <span>Export JSON</span>
+              </button>
+              <button id="exportMarkdownBtn" class="btn-settings-action" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+                <span>Export Markdown</span>
+              </button>
+            </div>
+
+            <div class="settings-button-grid">
+              <button id="importJsonBtn" class="btn-settings-action" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                </svg>
+                <span>Import Backup</span>
+              </button>
+              <button id="clearAllDataBtn" class="btn-settings-action danger" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                <span>Clear Stash</span>
+              </button>
+            </div>
+            <input id="importFileInput" type="file" accept=".json" style="display: none;">
+          </div>
+        </section>
+
+        <!-- Keyboard Shortcuts -->
+        <section class="settings-section">
+          <span class="settings-section-title">Productivity Shortcuts</span>
+          <div class="settings-card">
+            <div class="settings-row">
+              <span class="settings-label">Stash Active Tab</span>
+              <span class="shortcut-badge">Alt + Shift + S</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Stash All Window Tabs</span>
+              <span class="shortcut-badge">Alt + Shift + A</span>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Search Tabs in Popup</span>
+              <span class="shortcut-badge">/</span>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 
-  <!-- Stashed Tabs List -->
-  <main class="list-wrapper">
-    <ul id="stashedList" class="stashed-list">
-      <!-- Injected dynamically by popup.js -->
-    </ul>
-  </main>
+  <!-- Clear All Confirmation Modal -->
+  <div id="clearConfirmModal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h3 class="modal-title">Clear All Stashed Tabs?</h3>
+      <p class="modal-message">This will permanently remove all stashed tabs from storage. Consider exporting a JSON backup first.</p>
+      <div class="modal-actions">
+        <button id="cancelClearBtn" class="btn-modal-cancel" type="button">Cancel</button>
+        <button id="confirmClearBtn" class="btn-modal-confirm" type="button">Delete All</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Material Feedback Snackbar with Undo -->
   <div id="snackbar" class="snackbar" role="status">

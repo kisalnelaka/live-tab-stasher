@@ -1,12 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Live Tab Stasher",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lightning-fast session manager that stashes tabs and closes them immediately to eliminate RAM consumption.",
   "permissions": [
     "tabs",
-    "storage"
+    "storage",
+    "sidePanel"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Live Tab Stasher",
@@ -15,6 +19,25 @@
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "commands": {
+    "stash-current-tab": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Stash active tab and close immediately"
+    },
+    "stash-all-tabs": {
+      "suggested_key": {
+        "default": "Alt+Shift+A",
+        "mac": "Alt+Shift+A"
+      },
+      "description": "Stash all tabs in current window"
     }
   },
   "icons": {

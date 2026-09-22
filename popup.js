@@ -1,27 +1,36 @@
 /**
  * @file popup.js
- * @description Controller for the Live Tab Stasher extension popup.
- * Manages tab stashing, process closing for RAM relief, deterministic storage synchronization,
- * search filtering, Material 3 UI rendering, and snackbar undo states.
+ * @description Controller for the Live Tab Stasher extension popup and side panel.
+ * Handles chronological date grouping, multi-criteria sorting, domain filtering,
+ * bulk window stashing, star pinning, persistent settings, data export/import,
+ * and Material 3 Expressive UI state management.
  */
 
 'use strict';
 
 /**
- * Storage key constant for stashed tabs.
- * @type {string}
+ * Storage keys
  */
 const STORAGE_KEY = 'stashedTabs';
+const SETTINGS_KEY = 'userSettings';
 
 /**
- * Average memory consumed per Chromium tab (used for UX RAM estimation).
- * @type {number}
+ * Average memory consumed per Chromium tab (used for RAM estimation).
  */
 const AVG_RAM_PER_TAB_MB = 95;
 
 /**
- * Restricted URL schemes that the browser prevents extensions from controlling or closing safely.
- * @type {string[]}
+ * Default User Settings
+ */
+const DEFAULT_SETTINGS = {
+  groupByDate: true,
+  ignorePinnedTabs: true,
+  sortBy: 'date-desc',
+  closeOnStash: true
+};
+
+/**
+ * Restricted schemes that Chromium sandboxes prevent from manipulating.
  */
 const RESTRICTED_SCHEMES = [
   'chrome://',
@@ -33,141 +42,99 @@ const RESTRICTED_SCHEMES = [
 ];
 
 /**
- * Undo buffer holding last action state for the Material snackbar.
- * @type {{action: 'stash'|'delete', tab: Object, index: number}|null}
+ * State cache
  */
+let cachedTabs = [];
+let cachedSettings = { ...DEFAULT_SETTINGS };
+let activeDomainFilter = 'ALL';
 let lastUndoAction = null;
 let snackbarTimeout = null;
+const collapsedFolders = new Set();
 
 /**
  * DOM Elements Cache
  */
 const elements = {
-  stashBtn: document.getElementById('stashBtn'),
-  stashedList: document.getElementById('stashedList'),
+  // Views
+  mainView: document.getElementById('mainView'),
+  settingsView: document.getElementById('settingsView'),
+  openSettingsBtn: document.getElementById('openSettingsBtn'),
+  closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+  sidePanelBtn: document.getElementById('sidePanelBtn'),
+
+  // Header stats
   tabCount: document.getElementById('tabCount'),
   ramSavedLabel: document.getElementById('ramSavedLabel'),
+
+  // Primary Actions
+  stashBtn: document.getElementById('stashBtn'),
+  stashMoreBtn: document.getElementById('stashMoreBtn'),
+  stashDropdownMenu: document.getElementById('stashDropdownMenu'),
+  stashAllWindowBtn: document.getElementById('stashAllWindowBtn'),
+  stashOtherTabsBtn: document.getElementById('stashOtherTabsBtn'),
+
+  // Banners & Toolbars
   alertBanner: document.getElementById('alertBanner'),
   alertMessage: document.getElementById('alertMessage'),
   toolbarContainer: document.getElementById('toolbarContainer'),
   searchInput: document.getElementById('searchInput'),
   clearSearchBtn: document.getElementById('clearSearchBtn'),
-  restoreAllBtn: document.getElementById('restoreAllBtn'),
+  viewGroupedBtn: document.getElementById('viewGroupedBtn'),
+  viewFlatBtn: document.getElementById('viewFlatBtn'),
+  sortSelect: document.getElementById('sortSelect'),
+  domainChipsContainer: document.getElementById('domainChipsContainer'),
+  stashedListContent: document.getElementById('stashedListContent'),
+
+  // Settings elements
+  settingGroupByDate: document.getElementById('settingGroupByDate'),
+  settingIgnorePinned: document.getElementById('settingIgnorePinned'),
+  settingCloseOnStash: document.getElementById('settingCloseOnStash'),
+  exportJsonBtn: document.getElementById('exportJsonBtn'),
+  exportMarkdownBtn: document.getElementById('exportMarkdownBtn'),
+  importJsonBtn: document.getElementById('importJsonBtn'),
+  importFileInput: document.getElementById('importFileInput'),
+  clearAllDataBtn: document.getElementById('clearAllDataBtn'),
+
+  // Modal
+  clearConfirmModal: document.getElementById('clearConfirmModal'),
+  cancelClearBtn: document.getElementById('cancelClearBtn'),
+  confirmClearBtn: document.getElementById('confirmClearBtn'),
+
+  // Snackbar
   snackbar: document.getElementById('snackbar'),
   snackbarText: document.getElementById('snackbarText'),
   snackbarUndoBtn: document.getElementById('snackbarUndoBtn')
 };
 
 /**
- * Retrieves the latest list of stashed tabs directly from chrome.storage.local.
- * Guarantees fresh state synchronization prior to any mutation.
- * @returns {Promise<Array<{id: string, title: string, url: string, favIconUrl?: string, stashedAt: number}>>}
+ * Storage helpers
  */
-async function getStoredTabs() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get([STORAGE_KEY], (result) => {
-      if (chrome.runtime.lastError) {
-        console.error('Failed to retrieve stashed tabs:', chrome.runtime.lastError);
-        resolve([]);
-      } else {
-        resolve(Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : []);
-      }
-    });
-  });
+async function loadStoredData() {
+  const result = await chrome.storage.local.get([STORAGE_KEY, SETTINGS_KEY]);
+  cachedTabs = Array.isArray(result[STORAGE_KEY]) ? result[STORAGE_KEY] : [];
+  cachedSettings = { ...DEFAULT_SETTINGS, ...(result[SETTINGS_KEY] || {}) };
+  return { tabs: cachedTabs, settings: cachedSettings };
+}
+
+async function persistTabs(tabs) {
+  cachedTabs = tabs;
+  await chrome.storage.local.set({ [STORAGE_KEY]: tabs });
+}
+
+async function persistSettings(settings) {
+  cachedSettings = { ...cachedSettings, ...settings };
+  await chrome.storage.local.set({ [SETTINGS_KEY]: cachedSettings });
 }
 
 /**
- * Persists an array of tabs to chrome.storage.local.
- * @param {Array<Object>} tabsList - The array of tab objects to save.
- * @returns {Promise<void>}
- */
-async function saveTabs(tabsList) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [STORAGE_KEY]: tabsList }, () => {
-      if (chrome.runtime.lastError) {
-        console.error('Failed to write to storage:', chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
-/**
- * Validates whether a URL is restricted by the browser security sandbox.
- * @param {string} [url] - The URL to test.
- * @returns {boolean} True if the URL cannot be stashed.
+ * URL validation
  */
 function isRestrictedUrl(url) {
   if (!url || typeof url !== 'string') return true;
-  const lowerUrl = url.trim().toLowerCase();
-  return RESTRICTED_SCHEMES.some((scheme) => lowerUrl.startsWith(scheme));
+  const lower = url.trim().toLowerCase();
+  return RESTRICTED_SCHEMES.some((scheme) => lower.startsWith(scheme));
 }
 
-/**
- * Displays a transient error banner in the UI.
- * @param {string} message - Alert message to display.
- */
-function showAlert(message) {
-  if (!elements.alertBanner || !elements.alertMessage) return;
-  elements.alertMessage.textContent = message;
-  elements.alertBanner.classList.add('visible');
-
-  setTimeout(() => {
-    if (elements.alertBanner) {
-      elements.alertBanner.classList.remove('visible');
-    }
-  }, 3500);
-}
-
-/**
- * Displays the Material feedback snackbar with an optional Undo action.
- * @param {string} message - Feedback text.
- * @param {boolean} showUndo - Whether the undo button should be active.
- */
-function showSnackbar(message, showUndo = true) {
-  if (!elements.snackbar || !elements.snackbarText) return;
-
-  if (snackbarTimeout) {
-    clearTimeout(snackbarTimeout);
-  }
-
-  elements.snackbarText.textContent = message;
-  if (elements.snackbarUndoBtn) {
-    elements.snackbarUndoBtn.style.display = showUndo ? 'inline-block' : 'none';
-  }
-
-  elements.snackbar.classList.add('show');
-
-  snackbarTimeout = setTimeout(() => {
-    if (elements.snackbar) {
-      elements.snackbar.classList.remove('show');
-    }
-    lastUndoAction = null;
-  }, 4000);
-}
-
-/**
- * Formats a timestamp into a human-readable relative time string.
- * @param {number} timestamp - Unix epoch time in ms.
- * @returns {string} Formatted relative time.
- */
-function formatRelativeTime(timestamp) {
-  if (!timestamp) return '';
-  const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
-
-  if (secondsAgo < 45) return 'Just now';
-  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
-  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
-  return `${Math.floor(secondsAgo / 86400)}d ago`;
-}
-
-/**
- * Extracts a clean hostname from a URL for secondary preview text.
- * @param {string} url - The URL string.
- * @returns {string} Clean hostname or fallback.
- */
 function getHostname(url) {
   try {
     const parsed = new URL(url);
@@ -178,22 +145,123 @@ function getHostname(url) {
 }
 
 /**
- * Handles the "Stash Current Tab" action.
- * Queries active tab, verifies restrictions, updates storage, closes tab, and updates view.
- * @returns {Promise<void>}
+ * Alert & Notification Handlers
+ */
+function showAlert(message) {
+  if (!elements.alertBanner || !elements.alertMessage) return;
+  elements.alertMessage.textContent = message;
+  elements.alertBanner.classList.add('visible');
+
+  setTimeout(() => {
+    if (elements.alertBanner) elements.alertBanner.classList.remove('visible');
+  }, 3500);
+}
+
+function showSnackbar(message, showUndo = true) {
+  if (!elements.snackbar || !elements.snackbarText) return;
+  if (snackbarTimeout) clearTimeout(snackbarTimeout);
+
+  elements.snackbarText.textContent = message;
+  elements.snackbarUndoBtn.style.display = showUndo ? 'inline-block' : 'none';
+  elements.snackbar.classList.add('show');
+
+  snackbarTimeout = setTimeout(() => {
+    if (elements.snackbar) elements.snackbar.classList.remove('show');
+    lastUndoAction = null;
+  }, 4500);
+}
+
+/**
+ * Relative time formatter
+ */
+function formatRelativeTime(timestamp) {
+  if (!timestamp) return '';
+  const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
+  if (secondsAgo < 45) return 'Just now';
+  if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
+  if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
+  if (secondsAgo < 604800) return `${Math.floor(secondsAgo / 86400)}d ago`;
+  return new Date(timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/**
+ * SVG Helpers
+ */
+function createFallbackIcon() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'item-favicon-fallback');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>';
+  return svg;
+}
+
+/**
+ * Tab sorting logic
+ */
+function sortTabsList(tabs, sortKey) {
+  const copy = [...tabs];
+  switch (sortKey) {
+    case 'date-asc':
+      return copy.sort((a, b) => (a.stashedAt || 0) - (b.stashedAt || 0));
+    case 'domain-asc':
+      return copy.sort((a, b) => getHostname(a.url).localeCompare(getHostname(b.url)));
+    case 'title-asc':
+      return copy.sort((a, b) => (a.title || a.url || '').localeCompare(b.title || b.url || ''));
+    case 'date-desc':
+    default:
+      return copy.sort((a, b) => (b.stashedAt || 0) - (a.stashedAt || 0));
+  }
+}
+
+/**
+ * Date Grouping Partitioning
+ */
+function groupTabsChronologically(tabs) {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfYesterday = startOfToday - 86400000;
+  const startOfPastWeek = startOfToday - 7 * 86400000;
+
+  const groups = {
+    pinned: [],
+    today: [],
+    yesterday: [],
+    pastWeek: [],
+    older: []
+  };
+
+  for (const tab of tabs) {
+    if (tab.pinned) {
+      groups.pinned.push(tab);
+      continue;
+    }
+    const t = tab.stashedAt || 0;
+    if (t >= startOfToday) {
+      groups.today.push(tab);
+    } else if (t >= startOfYesterday) {
+      groups.yesterday.push(tab);
+    } else if (t >= startOfPastWeek) {
+      groups.pastWeek.push(tab);
+    } else {
+      groups.older.push(tab);
+    }
+  }
+
+  return groups;
+}
+
+/**
+ * Stash Single Active Tab
  */
 async function handleStashCurrentTab() {
   try {
-    const queryOptions = { active: true, currentWindow: true };
-    const [activeTab] = await chrome.tabs.query(queryOptions);
-
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!activeTab || !activeTab.id) {
       showAlert('No active tab detected in current window.');
       return;
     }
-
     if (isRestrictedUrl(activeTab.url)) {
-      showAlert('Restricted browser pages cannot be stashed.');
+      showAlert('Restricted browser page cannot be stashed.');
       return;
     }
 
@@ -202,49 +270,149 @@ async function handleStashCurrentTab() {
       title: activeTab.title ? activeTab.title.trim() : '',
       url: activeTab.url,
       favIconUrl: activeTab.favIconUrl || '',
-      stashedAt: Date.now()
+      stashedAt: Date.now(),
+      pinned: false
     };
 
-    // Synchronize latest state to eliminate race conditions
-    const currentTabs = await getStoredTabs();
-    const updatedTabs = [newTabEntry, ...currentTabs];
+    const updatedTabs = [newTabEntry, ...cachedTabs];
+    await persistTabs(updatedTabs);
+    await renderUI();
 
-    await saveTabs(updatedTabs);
-    await renderStashedList();
-
-    // Setup Undo record
     lastUndoAction = {
       action: 'stash',
-      tab: newTabEntry,
-      index: 0
+      tab: newTabEntry
     };
     showSnackbar('Tab stashed & closed to free RAM', true);
 
-    // Immediately close the active tab to reclaim RAM
-    await chrome.tabs.remove(activeTab.id);
+    if (cachedSettings.closeOnStash) {
+      await chrome.tabs.remove(activeTab.id);
+    }
   } catch (error) {
-    console.error('Error executing tab stash:', error);
+    console.error('Error in handleStashCurrentTab:', error);
     showAlert('Failed to stash current tab.');
   }
 }
 
 /**
- * Restores a stashed tab by opening it in a new browser tab and removing it from storage.
- * @param {string} id - Unique identifier of the stashed tab.
- * @param {string} url - Target URL to restore.
- * @returns {Promise<void>}
+ * Stash All Tabs in Current Window
+ */
+async function handleStashAllWindows() {
+  try {
+    elements.stashDropdownMenu.classList.remove('visible');
+    const currentWindow = await chrome.windows.getCurrent({ populate: true });
+    if (!currentWindow || !currentWindow.tabs) return;
+
+    const eligible = currentWindow.tabs.filter((t) => {
+      if (!t.url || isRestrictedUrl(t.url)) return false;
+      if (cachedSettings.ignorePinnedTabs && t.pinned) return false;
+      return true;
+    });
+
+    if (eligible.length === 0) {
+      showAlert('No stashable tabs found in this window.');
+      return;
+    }
+
+    const now = Date.now();
+    const newEntries = eligible.map((tab, idx) => ({
+      id: (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `tab_${now}_${idx}`,
+      title: tab.title ? tab.title.trim() : '',
+      url: tab.url,
+      favIconUrl: tab.favIconUrl || '',
+      stashedAt: now - idx * 10,
+      pinned: false
+    }));
+
+    await persistTabs([...newEntries, ...cachedTabs]);
+    await renderUI();
+
+    lastUndoAction = {
+      action: 'stash-batch',
+      tabs: newEntries
+    };
+    showSnackbar(`Stashed ${newEntries.length} tabs into memory`, true);
+
+    if (cachedSettings.closeOnStash) {
+      const ids = eligible.map((t) => t.id).filter(Boolean);
+      await chrome.tabs.remove(ids);
+    }
+  } catch (err) {
+    console.error('Failed to stash all tabs:', err);
+    showAlert('Failed to stash window tabs.');
+  }
+}
+
+/**
+ * Stash Other Tabs (keep active tab open)
+ */
+async function handleStashOtherTabs() {
+  try {
+    elements.stashDropdownMenu.classList.remove('visible');
+    const currentWindow = await chrome.windows.getCurrent({ populate: true });
+    if (!currentWindow || !currentWindow.tabs) return;
+
+    const activeTab = currentWindow.tabs.find((t) => t.active);
+    const eligible = currentWindow.tabs.filter((t) => {
+      if (activeTab && t.id === activeTab.id) return false;
+      if (!t.url || isRestrictedUrl(t.url)) return false;
+      if (cachedSettings.ignorePinnedTabs && t.pinned) return false;
+      return true;
+    });
+
+    if (eligible.length === 0) {
+      showAlert('No other tabs eligible for stashing.');
+      return;
+    }
+
+    const now = Date.now();
+    const newEntries = eligible.map((tab, idx) => ({
+      id: (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : `tab_${now}_${idx}`,
+      title: tab.title ? tab.title.trim() : '',
+      url: tab.url,
+      favIconUrl: tab.favIconUrl || '',
+      stashedAt: now - idx * 10,
+      pinned: false
+    }));
+
+    await persistTabs([...newEntries, ...cachedTabs]);
+    await renderUI();
+
+    lastUndoAction = {
+      action: 'stash-batch',
+      tabs: newEntries
+    };
+    showSnackbar(`Stashed ${newEntries.length} background tabs`, true);
+
+    if (cachedSettings.closeOnStash) {
+      const ids = eligible.map((t) => t.id).filter(Boolean);
+      await chrome.tabs.remove(ids);
+    }
+  } catch (err) {
+    console.error('Failed to stash other tabs:', err);
+    showAlert('Failed to stash other tabs.');
+  }
+}
+
+/**
+ * Restore Single Tab
  */
 async function handleRestoreTab(id, url) {
   try {
-    // Open in a new tab
     await chrome.tabs.create({ url, active: true });
+    const tabIndex = cachedTabs.findIndex((t) => t.id === id);
+    if (tabIndex !== -1) {
+      const removedTab = cachedTabs[tabIndex];
+      const updatedTabs = cachedTabs.filter((t) => t.id !== id);
+      await persistTabs(updatedTabs);
+      await renderUI();
 
-    // Remove from storage and re-render
-    const currentTabs = await getStoredTabs();
-    const filteredTabs = currentTabs.filter((tab) => tab.id !== id);
-
-    await saveTabs(filteredTabs);
-    await renderStashedList();
+      lastUndoAction = {
+        action: 'restore-single',
+        tab: removedTab,
+        index: tabIndex
+      };
+      showSnackbar('Tab restored', true);
+    }
   } catch (error) {
     console.error('Error restoring tab:', error);
     showAlert('Failed to restore tab.');
@@ -252,48 +420,46 @@ async function handleRestoreTab(id, url) {
 }
 
 /**
- * Restores all stashed tabs in batch and purges storage.
- * @returns {Promise<void>}
+ * Restore an Entire Group
  */
-async function handleRestoreAll() {
-  try {
-    const tabs = await getStoredTabs();
-    if (tabs.length === 0) return;
+async function handleRestoreGroup(groupTabs, groupTitle) {
+  if (!groupTabs || groupTabs.length === 0) return;
 
-    // Restore in reverse order so original order is preserved in browser
-    for (const tab of [...tabs].reverse()) {
+  try {
+    for (const tab of [...groupTabs].reverse()) {
       if (tab.url) {
         await chrome.tabs.create({ url: tab.url, active: false });
       }
     }
 
-    await saveTabs([]);
-    await renderStashedList();
-    showSnackbar(`Restored ${tabs.length} tabs`, false);
-  } catch (error) {
-    console.error('Error in batch restore:', error);
-    showAlert('Failed to restore all tabs.');
+    const groupIds = new Set(groupTabs.map((t) => t.id));
+    const remainingTabs = cachedTabs.filter((t) => !groupIds.has(t.id));
+    await persistTabs(remainingTabs);
+    await renderUI();
+
+    lastUndoAction = {
+      action: 'restore-group',
+      tabs: groupTabs
+    };
+    showSnackbar(`Restored ${groupTabs.length} tabs from ${groupTitle}`, true);
+  } catch (err) {
+    console.error('Error in handleRestoreGroup:', err);
+    showAlert('Failed to restore group.');
   }
 }
 
 /**
- * Deletes a stashed tab item without opening it.
- * Supports Undo via snackbar.
- * @param {string} id - Unique identifier of the tab to remove.
- * @returns {Promise<void>}
+ * Delete Single Tab
  */
 async function handleDeleteTab(id) {
   try {
-    const currentTabs = await getStoredTabs();
-    const itemIndex = currentTabs.findIndex((tab) => tab.id === id);
+    const itemIndex = cachedTabs.findIndex((tab) => tab.id === id);
     if (itemIndex === -1) return;
 
-    const [deletedItem] = currentTabs.splice(itemIndex, 1);
+    const [deletedItem] = cachedTabs.splice(itemIndex, 1);
+    await persistTabs(cachedTabs);
+    await renderUI();
 
-    await saveTabs(currentTabs);
-    await renderStashedList();
-
-    // Setup Undo record
     lastUndoAction = {
       action: 'delete',
       tab: deletedItem,
@@ -302,50 +468,25 @@ async function handleDeleteTab(id) {
     showSnackbar('Tab removed from stash', true);
   } catch (error) {
     console.error('Error deleting tab:', error);
-    showAlert('Failed to remove tab from stash.');
+    showAlert('Failed to remove tab.');
   }
 }
 
 /**
- * Reverses the last stashing or deletion action.
- * @returns {Promise<void>}
+ * Toggle Pin / Star on Tab
  */
-async function handleUndo() {
-  if (!lastUndoAction) return;
+async function handleTogglePin(id) {
+  const target = cachedTabs.find((t) => t.id === id);
+  if (!target) return;
 
-  try {
-    const { action, tab, index } = lastUndoAction;
-    const currentTabs = await getStoredTabs();
-
-    if (action === 'delete') {
-      // Restore back into storage at original index
-      currentTabs.splice(index, 0, tab);
-      await saveTabs(currentTabs);
-      await renderStashedList();
-      showSnackbar('Deletion undone', false);
-    } else if (action === 'stash') {
-      // Re-open tab in browser and remove from stashed list
-      if (tab.url) {
-        await chrome.tabs.create({ url: tab.url, active: true });
-      }
-      const filteredTabs = currentTabs.filter((t) => t.id !== tab.id);
-      await saveTabs(filteredTabs);
-      await renderStashedList();
-      showSnackbar('Stash undone & tab reopened', false);
-    }
-
-    lastUndoAction = null;
-    if (elements.snackbar) {
-      elements.snackbar.classList.remove('show');
-    }
-  } catch (error) {
-    console.error('Error executing undo:', error);
-  }
+  target.pinned = !target.pinned;
+  await persistTabs(cachedTabs);
+  await renderUI();
+  showSnackbar(target.pinned ? 'Tab pinned to top' : 'Tab unpinned', false);
 }
 
 /**
- * Copies a tab's URL to the clipboard.
- * @param {string} url - Target URL to copy.
+ * Copy Tab URL
  */
 async function handleCopyUrl(url) {
   try {
@@ -357,58 +498,382 @@ async function handleCopyUrl(url) {
 }
 
 /**
- * Creates an inline fallback SVG element for web tabs without valid favicons.
- * @returns {SVGElement} Material web page icon SVG.
+ * Reversal / Undo Handler
  */
-function createFallbackIcon() {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'item-favicon-fallback');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>';
-  return svg;
+async function handleUndo() {
+  if (!lastUndoAction) return;
+
+  try {
+    const { action, tab, tabs, index } = lastUndoAction;
+
+    if (action === 'delete') {
+      cachedTabs.splice(index, 0, tab);
+      await persistTabs(cachedTabs);
+      await renderUI();
+      showSnackbar('Deletion undone', false);
+    } else if (action === 'stash') {
+      if (tab.url) {
+        await chrome.tabs.create({ url: tab.url, active: true });
+      }
+      const filtered = cachedTabs.filter((t) => t.id !== tab.id);
+      await persistTabs(filtered);
+      await renderUI();
+      showSnackbar('Stash undone & tab reopened', false);
+    } else if (action === 'stash-batch') {
+      const ids = new Set(tabs.map((t) => t.id));
+      for (const t of tabs) {
+        if (t.url) await chrome.tabs.create({ url: t.url, active: false });
+      }
+      const filtered = cachedTabs.filter((t) => !ids.has(t.id));
+      await persistTabs(filtered);
+      await renderUI();
+      showSnackbar('Batch stash undone', false);
+    } else if (action === 'restore-single') {
+      cachedTabs.splice(index, 0, tab);
+      await persistTabs(cachedTabs);
+      await renderUI();
+      showSnackbar('Re-stashed tab', false);
+    } else if (action === 'restore-group') {
+      await persistTabs([...tabs, ...cachedTabs]);
+      await renderUI();
+      showSnackbar('Re-stashed group tabs', false);
+    } else if (action === 'clear-all') {
+      await persistTabs(tabs);
+      await renderUI();
+      showSnackbar('Restored all cleared tabs', false);
+    }
+
+    lastUndoAction = null;
+    elements.snackbar.classList.remove('show');
+  } catch (error) {
+    console.error('Error executing undo:', error);
+  }
 }
 
 /**
- * Renders the list of stashed tabs in the popup UI with real-time query filtering.
- * @returns {Promise<void>}
+ * Builds Tab Item Element
  */
-async function renderStashedList() {
-  const tabs = await getStoredTabs();
-  const { stashedList, tabCount, ramSavedLabel, toolbarContainer, searchInput } = elements;
+function createTabElement(tab) {
+  const listItem = document.createElement('div');
+  listItem.className = `stashed-item ${tab.pinned ? 'is-pinned' : ''}`;
+  listItem.setAttribute('role', 'button');
+  listItem.setAttribute('tabindex', '0');
+  listItem.title = `Click to restore: ${tab.title || tab.url}`;
 
-  if (!stashedList) return;
+  // Main details
+  const mainDiv = document.createElement('div');
+  mainDiv.className = 'item-main';
 
-  const totalCount = tabs.length;
+  // Favicon
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'favicon-wrap';
 
-  // Update Header Badges & Memory Estimator
-  if (tabCount) {
-    tabCount.textContent = String(totalCount);
+  if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
+    const img = document.createElement('img');
+    img.className = 'item-favicon';
+    img.src = tab.favIconUrl;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onerror = () => {
+      img.replaceWith(createFallbackIcon());
+    };
+    iconWrap.appendChild(img);
+  } else {
+    iconWrap.appendChild(createFallbackIcon());
   }
-  if (ramSavedLabel) {
-    const ramFreedMb = totalCount * AVG_RAM_PER_TAB_MB;
-    ramSavedLabel.textContent = totalCount > 0 ? `~${ramFreedMb} MB RAM freed` : '0 MB RAM freed';
-  }
+  mainDiv.appendChild(iconWrap);
 
-  // Toggle Search/Batch Toolbar when items exist
-  if (toolbarContainer) {
-    if (totalCount >= 2) {
-      toolbarContainer.classList.add('visible');
-    } else {
-      toolbarContainer.classList.remove('visible');
-      if (searchInput) searchInput.value = '';
+  // Text group
+  const textGroup = document.createElement('div');
+  textGroup.className = 'item-text-group';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'item-title';
+  titleEl.textContent = tab.title || tab.url;
+
+  const metaEl = document.createElement('div');
+  metaEl.className = 'item-meta';
+
+  const domainTag = document.createElement('span');
+  domainTag.className = 'domain-tag';
+  domainTag.textContent = getHostname(tab.url);
+
+  const separator = document.createElement('span');
+  separator.className = 'separator';
+  separator.textContent = '•';
+
+  const timeSpan = document.createElement('span');
+  timeSpan.textContent = formatRelativeTime(tab.stashedAt);
+
+  metaEl.appendChild(domainTag);
+  metaEl.appendChild(separator);
+  metaEl.appendChild(timeSpan);
+
+  textGroup.appendChild(titleEl);
+  textGroup.appendChild(metaEl);
+  mainDiv.appendChild(textGroup);
+
+  // Click to restore
+  mainDiv.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleRestoreTab(tab.id, tab.url);
+  });
+
+  // Actions
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'item-actions';
+
+  // Star / Pin Button
+  const pinBtn = document.createElement('button');
+  pinBtn.className = `btn-icon ${tab.pinned ? 'active-star' : ''}`;
+  pinBtn.type = 'button';
+  pinBtn.title = tab.pinned ? 'Unpin tab' : 'Pin to top';
+  pinBtn.setAttribute('aria-label', tab.pinned ? 'Unpin tab' : 'Pin tab');
+  pinBtn.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="${tab.pinned ? 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' : 'M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z'}"/>
+    </svg>
+  `;
+  pinBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleTogglePin(tab.id);
+  });
+
+  // Copy Link Button
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'btn-icon';
+  copyBtn.type = 'button';
+  copyBtn.title = 'Copy URL';
+  copyBtn.setAttribute('aria-label', 'Copy tab URL');
+  copyBtn.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+    </svg>
+  `;
+  copyBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleCopyUrl(tab.url);
+  });
+
+  // Delete Button
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'btn-icon delete';
+  deleteBtn.type = 'button';
+  deleteBtn.title = 'Remove from stash';
+  deleteBtn.setAttribute('aria-label', `Delete ${tab.title || tab.url}`);
+  deleteBtn.innerHTML = `
+    <svg viewBox="0 0 24 24">
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+    </svg>
+  `;
+  deleteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleDeleteTab(tab.id);
+  });
+
+  actionsDiv.appendChild(pinBtn);
+  actionsDiv.appendChild(copyBtn);
+  actionsDiv.appendChild(deleteBtn);
+
+  listItem.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleRestoreTab(tab.id, tab.url);
     }
+  });
+
+  listItem.appendChild(mainDiv);
+  listItem.appendChild(actionsDiv);
+  return listItem;
+}
+
+/**
+ * Builds Accordion Folder Group Element
+ */
+function createFolderElement(groupId, title, groupTabs, isPinned = false) {
+  const folder = document.createElement('section');
+  const isCollapsed = collapsedFolders.has(groupId);
+  folder.className = `folder-group ${isPinned ? 'pinned-group' : ''} ${isCollapsed ? 'collapsed' : ''}`;
+
+  const header = document.createElement('header');
+  header.className = 'folder-header';
+
+  // Left
+  const left = document.createElement('div');
+  left.className = 'folder-header-left';
+
+  const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  chevron.setAttribute('class', 'folder-chevron');
+  chevron.setAttribute('viewBox', '0 0 24 24');
+  chevron.innerHTML = '<path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>';
+
+  const titleWrap = document.createElement('div');
+  titleWrap.className = 'folder-title-wrap';
+
+  const titleEl = document.createElement('span');
+  titleEl.className = 'folder-title';
+  titleEl.textContent = title;
+
+  const countPill = document.createElement('span');
+  countPill.className = 'folder-pill';
+  countPill.textContent = `${groupTabs.length} tab${groupTabs.length > 1 ? 's' : ''}`;
+
+  titleWrap.appendChild(titleEl);
+  titleWrap.appendChild(countPill);
+
+  left.appendChild(chevron);
+  left.appendChild(titleWrap);
+
+  // Right
+  const right = document.createElement('div');
+  right.className = 'folder-header-right';
+
+  const restoreBtn = document.createElement('button');
+  restoreBtn.className = 'btn-folder-action';
+  restoreBtn.type = 'button';
+  restoreBtn.title = `Restore all ${groupTabs.length} tabs in ${title}`;
+  restoreBtn.innerHTML = `
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+    </svg>
+    <span>Restore</span>
+  `;
+  restoreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleRestoreGroup(groupTabs, title);
+  });
+
+  right.appendChild(restoreBtn);
+
+  header.appendChild(left);
+  header.appendChild(right);
+
+  // Accordion toggle
+  header.addEventListener('click', () => {
+    if (collapsedFolders.has(groupId)) {
+      collapsedFolders.delete(groupId);
+      folder.classList.remove('collapsed');
+    } else {
+      collapsedFolders.add(groupId);
+      folder.classList.add('collapsed');
+    }
+  });
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'folder-body';
+
+  const bodyInner = document.createElement('div');
+  bodyInner.className = 'folder-body-inner';
+
+  groupTabs.forEach((tab) => {
+    bodyInner.appendChild(createTabElement(tab));
+  });
+
+  body.appendChild(bodyInner);
+  folder.appendChild(header);
+  folder.appendChild(body);
+
+  return folder;
+}
+
+/**
+ * Domain filter chips builder
+ */
+function renderDomainChips(tabs) {
+  const container = elements.domainChipsContainer;
+  if (!container) return;
+
+  if (tabs.length < 3) {
+    container.classList.remove('visible');
+    container.innerHTML = '';
+    return;
   }
 
-  // Filter tabs based on search term
+  // Count domains
+  const counts = {};
+  for (const t of tabs) {
+    const domain = getHostname(t.url);
+    if (domain) counts[domain] = (counts[domain] || 0) + 1;
+  }
+
+  const sortedDomains = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
+
+  if (sortedDomains.length <= 1) {
+    container.classList.remove('visible');
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = '';
+  container.classList.add('visible');
+
+  // "All" chip
+  const allChip = document.createElement('button');
+  allChip.className = `domain-chip ${activeDomainFilter === 'ALL' ? 'active' : ''}`;
+  allChip.textContent = `All (${tabs.length})`;
+  allChip.type = 'button';
+  allChip.addEventListener('click', () => {
+    activeDomainFilter = 'ALL';
+    renderUI();
+  });
+  container.appendChild(allChip);
+
+  // Individual chips
+  for (const [domain, count] of sortedDomains) {
+    const chip = document.createElement('button');
+    chip.className = `domain-chip ${activeDomainFilter === domain ? 'active' : ''}`;
+    chip.textContent = `${domain} (${count})`;
+    chip.type = 'button';
+    chip.addEventListener('click', () => {
+      activeDomainFilter = activeDomainFilter === domain ? 'ALL' : domain;
+      renderUI();
+    });
+    container.appendChild(chip);
+  }
+}
+
+/**
+ * Master UI Render Engine
+ */
+async function renderUI() {
+  const { stashedListContent, tabCount, ramSavedLabel, sortSelect, searchInput } = elements;
+  if (!stashedListContent) return;
+
+  const totalCount = cachedTabs.length;
+
+  // Header Counters
+  if (tabCount) tabCount.textContent = String(totalCount);
+  if (ramSavedLabel) {
+    const ramMb = totalCount * AVG_RAM_PER_TAB_MB;
+    ramSavedLabel.textContent = totalCount > 0 ? `~${ramMb} MB freed` : '0 MB freed';
+  }
+
+  // Query and domain filtering
   const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
-  const filteredTabs = query
-    ? tabs.filter((t) => (t.title && t.title.toLowerCase().includes(query)) || (t.url && t.url.toLowerCase().includes(query)))
-    : tabs;
+  let filtered = [...cachedTabs];
 
-  // Clear previous DOM nodes
-  stashedList.innerHTML = '';
+  if (activeDomainFilter !== 'ALL') {
+    filtered = filtered.filter((t) => getHostname(t.url) === activeDomainFilter);
+  }
 
-  // Empty State Guard
+  if (query) {
+    filtered = filtered.filter((t) => (t.title && t.title.toLowerCase().includes(query)) || (t.url && t.url.toLowerCase().includes(query)));
+  }
+
+  // Domain Filter Chips
+  renderDomainChips(cachedTabs);
+
+  // Sync sort dropdown
+  const sortMode = sortSelect ? sortSelect.value : cachedSettings.sortBy;
+  filtered = sortTabsList(filtered, sortMode);
+
+  // Clear previous markup
+  stashedListContent.innerHTML = '';
+
+  // Empty state guard
   if (totalCount === 0) {
     const emptyState = document.createElement('div');
     emptyState.className = 'empty-state';
@@ -418,165 +883,362 @@ async function renderStashedList() {
           <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/>
         </svg>
       </div>
-      <span class="empty-title">No stashed tabs</span>
-      <span class="empty-subtitle">Click "Stash Current Tab" to immediately close idle tabs and reclaim memory.</span>
+      <span class="empty-title">Your stash is clean</span>
+      <span class="empty-subtitle">Click "Stash Current Tab" or press <kbd>Alt+Shift+S</kbd> to free up RAM.</span>
     `;
-    stashedList.appendChild(emptyState);
+    stashedListContent.appendChild(emptyState);
     return;
   }
 
-  // Search No Matches State
-  if (filteredTabs.length === 0 && query) {
+  // Filter with no matches
+  if (filtered.length === 0) {
     const noMatch = document.createElement('div');
     noMatch.className = 'empty-state';
     noMatch.innerHTML = `
       <span class="empty-title">No matching tabs</span>
-      <span class="empty-subtitle">No saved tabs match "${escapeHtml(query)}"</span>
+      <span class="empty-subtitle">Try adjusting your search query or domain filter.</span>
     `;
-    stashedList.appendChild(noMatch);
+    stashedListContent.appendChild(noMatch);
     return;
   }
 
-  // Render individual list items
-  filteredTabs.forEach((tab) => {
-    const listItem = document.createElement('li');
-    listItem.className = 'stashed-item';
-    listItem.setAttribute('role', 'button');
-    listItem.setAttribute('tabindex', '0');
-    listItem.title = `Click to restore: ${tab.title || tab.url}`;
+  // Render Folders vs Flat List
+  if (cachedSettings.groupByDate && !query) {
+    const groups = groupTabsChronologically(filtered);
 
-    // Item Main Body (Favicon + Text Details)
-    const mainDiv = document.createElement('div');
-    mainDiv.className = 'item-main';
-
-    // Favicon container
-    const iconWrap = document.createElement('div');
-    iconWrap.className = 'favicon-wrap';
-
-    if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
-      const img = document.createElement('img');
-      img.className = 'item-favicon';
-      img.src = tab.favIconUrl;
-      img.alt = '';
-      img.loading = 'lazy';
-      img.onerror = () => {
-        img.replaceWith(createFallbackIcon());
-      };
-      iconWrap.appendChild(img);
-    } else {
-      iconWrap.appendChild(createFallbackIcon());
+    if (groups.pinned.length > 0) {
+      stashedListContent.appendChild(
+        createFolderElement('group_pinned', 'Pinned Tabs ⭐', groups.pinned, true)
+      );
     }
-    mainDiv.appendChild(iconWrap);
-
-    // Detail group
-    const textGroup = document.createElement('div');
-    textGroup.className = 'item-text-group';
-
-    const titleEl = document.createElement('div');
-    titleEl.className = 'item-title';
-    titleEl.textContent = tab.title || tab.url;
-
-    const metaEl = document.createElement('div');
-    metaEl.className = 'item-meta';
-
-    const domainSpan = document.createElement('span');
-    domainSpan.textContent = getHostname(tab.url);
-
-    const separator = document.createElement('span');
-    separator.className = 'separator';
-    separator.textContent = '•';
-
-    const timeSpan = document.createElement('span');
-    timeSpan.textContent = formatRelativeTime(tab.stashedAt);
-
-    metaEl.appendChild(domainSpan);
-    metaEl.appendChild(separator);
-    metaEl.appendChild(timeSpan);
-
-    textGroup.appendChild(titleEl);
-    textGroup.appendChild(metaEl);
-    mainDiv.appendChild(textGroup);
-
-    // Clicking main card restores tab
-    mainDiv.addEventListener('click', (e) => {
-      e.stopPropagation();
-      handleRestoreTab(tab.id, tab.url);
+    if (groups.today.length > 0) {
+      stashedListContent.appendChild(
+        createFolderElement('group_today', 'Today', groups.today)
+      );
+    }
+    if (groups.yesterday.length > 0) {
+      stashedListContent.appendChild(
+        createFolderElement('group_yesterday', 'Yesterday', groups.yesterday)
+      );
+    }
+    if (groups.pastWeek.length > 0) {
+      stashedListContent.appendChild(
+        createFolderElement('group_week', 'Previous 7 Days', groups.pastWeek)
+      );
+    }
+    if (groups.older.length > 0) {
+      stashedListContent.appendChild(
+        createFolderElement('group_older', 'Older Tabs', groups.older)
+      );
+    }
+  } else {
+    // Flat List View
+    const flatList = document.createElement('div');
+    flatList.className = 'stashed-list-flat';
+    filtered.forEach((tab) => {
+      flatList.appendChild(createTabElement(tab));
     });
+    stashedListContent.appendChild(flatList);
+  }
+}
 
-    // Action buttons (Copy + Delete)
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'item-actions';
+/**
+ * Export stashed tabs to JSON
+ */
+function handleExportJSON() {
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cachedTabs, null, 2));
+  const downloadAnchor = document.createElement('a');
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadAnchor.setAttribute('href', dataStr);
+  downloadAnchor.setAttribute('download', `live-tab-stasher-backup-${dateStr}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  showSnackbar('Exported JSON backup', false);
+}
 
-    // Copy Link Button
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn-icon';
-    copyBtn.type = 'button';
-    copyBtn.title = 'Copy URL';
-    copyBtn.setAttribute('aria-label', 'Copy tab URL');
-    copyBtn.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-      </svg>
-    `;
-    copyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      handleCopyUrl(tab.url);
-    });
+/**
+ * Export stashed tabs to Markdown bookmarks
+ */
+function handleExportMarkdown() {
+  const lines = ['# Live Tab Stasher Bookmarks\n'];
+  for (const t of cachedTabs) {
+    const title = t.title || t.url;
+    const date = new Date(t.stashedAt || Date.now()).toLocaleDateString();
+    lines.push(`- [${title.replace(/[[\]]/g, '')}](${t.url}) - *Stashed: ${date}*`);
+  }
+  const dataStr = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+  const downloadAnchor = document.createElement('a');
+  const dateStr = new Date().toISOString().split('T')[0];
+  downloadAnchor.setAttribute('href', dataStr);
+  downloadAnchor.setAttribute('download', `live-tab-stasher-bookmarks-${dateStr}.md`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  showSnackbar('Exported Markdown bookmarks', false);
+}
 
-    // Delete Button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn-icon delete';
-    deleteBtn.type = 'button';
-    deleteBtn.title = 'Remove from stash';
-    deleteBtn.setAttribute('aria-label', `Delete ${tab.title || tab.url}`);
-    deleteBtn.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-      </svg>
-    `;
-    deleteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      handleDeleteTab(tab.id);
-    });
+/**
+ * Import JSON backup
+ */
+async function handleImportFile(file) {
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    if (!Array.isArray(imported)) {
+      showAlert('Invalid JSON format: Expected an array of tabs.');
+      return;
+    }
 
-    actionsDiv.appendChild(copyBtn);
-    actionsDiv.appendChild(deleteBtn);
+    const existingUrls = new Set(cachedTabs.map((t) => t.url));
+    const newItems = [];
 
-    // Keyboard support for restoration
-    listItem.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleRestoreTab(tab.id, tab.url);
+    for (const item of imported) {
+      if (item && item.url && !existingUrls.has(item.url)) {
+        newItems.push({
+          id: item.id || `tab_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          title: item.title || item.url,
+          url: item.url,
+          favIconUrl: item.favIconUrl || '',
+          stashedAt: item.stashedAt || Date.now(),
+          pinned: Boolean(item.pinned)
+        });
+        existingUrls.add(item.url);
       }
-    });
+    }
 
-    listItem.appendChild(mainDiv);
-    listItem.appendChild(actionsDiv);
-    stashedList.appendChild(listItem);
-  });
+    const merged = [...newItems, ...cachedTabs];
+    await persistTabs(merged);
+    await renderUI();
+    showSnackbar(`Imported ${newItems.length} new tabs`, false);
+  } catch (err) {
+    console.error('Import parse error:', err);
+    showAlert('Failed to parse backup JSON file.');
+  }
 }
 
 /**
- * Escapes HTML characters for safe UI interpolation.
- * @param {string} str - Raw string.
- * @returns {string} Escaped string.
+ * Side panel opener
  */
-function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+async function handleOpenSidePanel() {
+  try {
+    if (chrome.sidePanel && typeof chrome.sidePanel.open === 'function') {
+      const currentWin = await chrome.windows.getCurrent();
+      await chrome.sidePanel.open({ windowId: currentWin.id });
+      window.close();
+    } else {
+      showAlert('Side panel is not supported in this Chromium version.');
+    }
+  } catch (err) {
+    console.error('Side panel open failed:', err);
+    showAlert('Could not open side panel.');
+  }
 }
 
 /**
- * Event Listeners & Lifecycle Setup
+ * Event Listeners & Initialization
  */
-document.addEventListener('DOMContentLoaded', () => {
-  // Stash primary action
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadStoredData();
+
+  // Primary Stash Click
   if (elements.stashBtn) {
     elements.stashBtn.addEventListener('click', handleStashCurrentTab);
   }
 
-  // Restore All batch action
-  if (elements.restoreAllBtn) {
-    elements.restoreAllBtn.addEventListener('click', handleRestoreAll);
+  // Dropdown toggle
+  if (elements.stashMoreBtn) {
+    elements.stashMoreBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.stashDropdownMenu.classList.toggle('visible');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (elements.stashDropdownMenu && !elements.stashDropdownMenu.contains(e.target)) {
+      elements.stashDropdownMenu.classList.remove('visible');
+    }
+  });
+
+  if (elements.stashAllWindowBtn) {
+    elements.stashAllWindowBtn.addEventListener('click', handleStashAllWindows);
+  }
+
+  if (elements.stashOtherTabsBtn) {
+    elements.stashOtherTabsBtn.addEventListener('click', handleStashOtherTabs);
+  }
+
+  // Side Panel Trigger
+  if (elements.sidePanelBtn) {
+    elements.sidePanelBtn.addEventListener('click', handleOpenSidePanel);
+  }
+
+  // Navigation: Settings View
+  if (elements.openSettingsBtn) {
+    elements.openSettingsBtn.addEventListener('click', () => {
+      elements.mainView.classList.add('hidden');
+      elements.settingsView.classList.remove('hidden');
+      // Sync form switches with active settings
+      elements.settingGroupByDate.checked = cachedSettings.groupByDate;
+      elements.settingIgnorePinned.checked = cachedSettings.ignorePinnedTabs;
+      elements.settingCloseOnStash.checked = cachedSettings.closeOnStash;
+    });
+  }
+
+  if (elements.closeSettingsBtn) {
+    elements.closeSettingsBtn.addEventListener('click', () => {
+      elements.settingsView.classList.add('hidden');
+      elements.mainView.classList.remove('hidden');
+      renderUI();
+    });
+  }
+
+  // View Mode: Grouped vs Flat
+  if (elements.viewGroupedBtn && elements.viewFlatBtn) {
+    elements.viewGroupedBtn.addEventListener('click', async () => {
+      elements.viewGroupedBtn.classList.add('active');
+      elements.viewFlatBtn.classList.remove('active');
+      await persistSettings({ groupByDate: true });
+      renderUI();
+    });
+
+    elements.viewFlatBtn.addEventListener('click', async () => {
+      elements.viewFlatBtn.classList.add('active');
+      elements.viewGroupedBtn.classList.remove('active');
+      await persistSettings({ groupByDate: false });
+      renderUI();
+    });
+
+    if (cachedSettings.groupByDate) {
+      elements.viewGroupedBtn.classList.add('active');
+      elements.viewFlatBtn.classList.remove('active');
+    } else {
+      elements.viewFlatBtn.classList.add('active');
+      elements.viewGroupedBtn.classList.remove('active');
+    }
+  }
+
+  // Sort Selector
+  if (elements.sortSelect) {
+    elements.sortSelect.value = cachedSettings.sortBy || 'date-desc';
+    elements.sortSelect.addEventListener('change', async (e) => {
+      await persistSettings({ sortBy: e.target.value });
+      renderUI();
+    });
+  }
+
+  // Search Input & Shortcuts
+  if (elements.searchInput) {
+    elements.searchInput.addEventListener('input', () => {
+      if (elements.searchInput.value) {
+        elements.clearSearchBtn.classList.add('visible');
+      } else {
+        elements.clearSearchBtn.classList.remove('visible');
+      }
+      renderUI();
+    });
+
+    elements.searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        elements.searchInput.value = '';
+        elements.clearSearchBtn.classList.remove('visible');
+        elements.searchInput.blur();
+        renderUI();
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement !== elements.searchInput) {
+        e.preventDefault();
+        elements.searchInput.focus();
+      }
+    });
+  }
+
+  if (elements.clearSearchBtn) {
+    elements.clearSearchBtn.addEventListener('click', () => {
+      elements.searchInput.value = '';
+      elements.clearSearchBtn.classList.remove('visible');
+      elements.searchInput.focus();
+      renderUI();
+    });
+  }
+
+  // Settings Toggles
+  if (elements.settingGroupByDate) {
+    elements.settingGroupByDate.addEventListener('change', async (e) => {
+      await persistSettings({ groupByDate: e.target.checked });
+      if (elements.viewGroupedBtn && elements.viewFlatBtn) {
+        if (e.target.checked) {
+          elements.viewGroupedBtn.classList.add('active');
+          elements.viewFlatBtn.classList.remove('active');
+        } else {
+          elements.viewFlatBtn.classList.add('active');
+          elements.viewGroupedBtn.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  if (elements.settingIgnorePinned) {
+    elements.settingIgnorePinned.addEventListener('change', async (e) => {
+      await persistSettings({ ignorePinnedTabs: e.target.checked });
+    });
+  }
+
+  if (elements.settingCloseOnStash) {
+    elements.settingCloseOnStash.addEventListener('change', async (e) => {
+      await persistSettings({ closeOnStash: e.target.checked });
+    });
+  }
+
+  // Export / Import
+  if (elements.exportJsonBtn) {
+    elements.exportJsonBtn.addEventListener('click', handleExportJSON);
+  }
+
+  if (elements.exportMarkdownBtn) {
+    elements.exportMarkdownBtn.addEventListener('click', handleExportMarkdown);
+  }
+
+  if (elements.importJsonBtn && elements.importFileInput) {
+    elements.importJsonBtn.addEventListener('click', () => {
+      elements.importFileInput.click();
+    });
+
+    elements.importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) handleImportFile(file);
+      elements.importFileInput.value = '';
+    });
+  }
+
+  // Clear All Modal Dialog
+  if (elements.clearAllDataBtn) {
+    elements.clearAllDataBtn.addEventListener('click', () => {
+      elements.clearConfirmModal.classList.add('visible');
+    });
+  }
+
+  if (elements.cancelClearBtn) {
+    elements.cancelClearBtn.addEventListener('click', () => {
+      elements.clearConfirmModal.classList.remove('visible');
+    });
+  }
+
+  if (elements.confirmClearBtn) {
+    elements.confirmClearBtn.addEventListener('click', async () => {
+      const previousTabs = [...cachedTabs];
+      elements.clearConfirmModal.classList.remove('visible');
+      await persistTabs([]);
+      await renderUI();
+      lastUndoAction = {
+        action: 'clear-all',
+        tabs: previousTabs
+      };
+      showSnackbar('All stashed tabs deleted', true);
+    });
   }
 
   // Undo button
@@ -584,39 +1246,6 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.snackbarUndoBtn.addEventListener('click', handleUndo);
   }
 
-  // Search input and clear action
-  if (elements.searchInput) {
-    elements.searchInput.addEventListener('input', () => {
-      if (elements.clearSearchBtn) {
-        if (elements.searchInput.value) {
-          elements.clearSearchBtn.classList.add('visible');
-        } else {
-          elements.clearSearchBtn.classList.remove('visible');
-        }
-      }
-      renderStashedList();
-    });
-
-    elements.searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        elements.searchInput.value = '';
-        if (elements.clearSearchBtn) elements.clearSearchBtn.classList.remove('visible');
-        renderStashedList();
-      }
-    });
-  }
-
-  if (elements.clearSearchBtn) {
-    elements.clearSearchBtn.addEventListener('click', () => {
-      if (elements.searchInput) {
-        elements.searchInput.value = '';
-        elements.clearSearchBtn.classList.remove('visible');
-        elements.searchInput.focus();
-        renderStashedList();
-      }
-    });
-  }
-
   // Initial render
-  renderStashedList();
+  await renderUI();
 });
